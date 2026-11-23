@@ -11,8 +11,7 @@ void App::drawHeader() {
     ui.drawSuit(3, {42, 35}, 15, mint);
     ui.drawDisplayText("Neon Ante", 78, 12, 32, ink);
     ui.drawText("POKER  /  CARD CLUB", 80, 49, 11, muted, true);
-    ui.drawText(game.endless ? "ENDLESS TABLE" : "THE EIGHT-ANTE CIRCUIT", 440, 29, 15, muted,
-                true);
+    if(ui.button({440,19,245,37},game.modeName()+" / Modes",mint)){pendingMode=static_cast<int>(game.mode);pendingStarter=game.starter;modal=Modal::RunSetup;}
     ui.drawCenteredText("ANTE " + std::to_string(game.ante) + (game.endless ? "" : " / 8"), 876, 24,
                         24, gold, true);
     if (ui.button({1000, 19, 56, 37}, audio.muted ? "M" : "~", mint)) {
@@ -64,8 +63,10 @@ void App::drawSidebar() {
     ui.drawText("$" + number(game.cash), 24, 561, 40, gold, true);
     ui.drawText("Interest  $" + std::to_string(std::min(5, game.cash / 5)) + " / blind", 24, 612,
                 15, muted);
-    ui.drawText("ROUND " + std::to_string(game.round), 24, 654, 13, muted, true);
-    ui.drawText("Best hand  " + number(game.best), 24, 678, 16, ink);
+    if(game.canChooseContract()){
+        if(ui.button({24,644,216,36},"Table challenge",gold)){modal=Modal::Contract;}
+    }else ui.drawFittedText(game.contract?game.contractName():game.starterName()+" / round "+std::to_string(game.round),{24,650,216,27},18,game.contract?gold:ink,true);
+    ui.drawText(game.mode==RunMode::Echo?"Echo target +"+std::to_string(static_cast<int>((game.echoScale-1)*100+.5))+"%":"Seed "+(game.runSeed?std::to_string(game.runSeed):"legacy"),24,695,13,muted);
     if (ui.button({24, 725, 216, 42}, "Deck  " + std::to_string(game.draw.size()) + " / 52",
                   mint)) {
         modal = Modal::Deck;
@@ -74,6 +75,7 @@ void App::drawSidebar() {
 }
 
 void App::drawRelicRow() {
+    int moveIndex=-1,moveDirection=0;
     ui.drawText("RELICS", 292, 92, 13, muted, true);
     ui.drawText(std::to_string(game.owned.size()) + " / 5", 1209, 92, 13, muted, true);
     for (int i = 0; i < 5; ++i) {
@@ -81,7 +83,9 @@ void App::drawRelicRow() {
         if (i < static_cast<int>(game.owned.size())) {
             int id = game.owned[i];
             ui.drawRelic(id, r);
-            ui.showTooltip(relics[id].description, r);
+            if(ui.button({r.x+6,r.y+6,25,23},"<",mint,false,i>0)){moveIndex=i;moveDirection=-1;}
+            if(ui.button({r.x+r.width-31,r.y+6,25,23},">",mint,false,i+1<static_cast<int>(game.owned.size()))){moveIndex=i;moveDirection=1;}
+            ui.showTooltip(std::string(relics[id].description)+" / Move slots to change scoring order.", r);
             if (ui.wasClicked(r)) {
                 modal = Modal::Relic;
                 relicDetailIndex = i;
@@ -94,5 +98,7 @@ void App::drawRelicRow() {
             ui.drawCenteredText("RELIC SLOT", r.x + r.width / 2, 202, 11, Fade(muted, .65f));
         }
     }
+    ui.drawText("Effects resolve left to right. Move a relic with its corner controls.",292,240,12,muted);
+    if(moveIndex>=0)finishAction(game.moveRelic(moveIndex,moveDirection));
 }
 } // namespace neon

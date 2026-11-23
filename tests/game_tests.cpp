@@ -1,4 +1,5 @@
 #include "../src/game.hpp"
+#include "../src/build_profiles.hpp"
 #include <algorithm>
 #include <array>
 #include <filesystem>
@@ -161,6 +162,48 @@ int main() {
         auto before = loaded.hand;
         check(!loaded.load(path) && loaded.hand == before, "invalid save leaves state untouched");
         std::filesystem::remove(path);
+
+        g.newRun(123,RunMode::Classic,1);
+        check(g.cash==4 && g.discards==4 && g.starter==1, "Planner trades starting cash for an extra discard");
+        g.newRun(dailySeedFor("2026-11-23"),RunMode::Daily,0);
+        Game dailyCopy(1);dailyCopy.newRun(dailySeedFor("2026-11-23"),RunMode::Daily,0);
+        check(g.hand==dailyCopy.hand && g.draw==dailyCopy.draw && dailySeedFor("2026-11-23")!=dailySeedFor("2026-11-24"),"daily seeds reproduce deals and change on the next date");
+        g.newRun(4,RunMode::Classic,2);g.owned.clear();g.lastHandType=0;g.rhythm=2;
+        check(g.evaluate(cards({10,10})).total==87,"Performer preview applies the next varied-hand rhythm bonus");
+        g.lastHandType=1;check(g.evaluate(cards({10,10})).total==64,"repeated hand type breaks Performer rhythm");
+        g.newRun(5);check(g.chooseContract(1)&&!g.chooseContract(4),"challenge choice is committed once");
+        deal(g,cards({10,11,12,13,14},true));check(g.play()&&g.contractReward==4&&g.reward==12,"first-hand challenge pays once within the blind payout");
+        g.newRun(7);g.toggle(g.hand[0]);g.discard();check(!g.chooseContract(1),"cannot choose a challenge after discarding");
+        g.newRun(5,RunMode::Draft);deal(g,cards({10,11,12,13,14},true));g.play();
+        check(!g.draftTaken&&g.draftChoices.size()==3&&!g.next(),"draft mode requires a choice or explicit pass before advancing");
+        const auto choices=g.draftChoices;const int draftCash=g.cash;g.reroll();
+        check(g.draftChoices==choices&&!g.draftTaken,"shop rerolls do not refresh the free draft");
+        g.cash=draftCash;check(g.takeDraft(0)&&g.draftTaken&&g.cash==draftCash&&!g.takeDraft(1),"free draft gives exactly one relic and does not spend cash");
+        g.newRun(5,RunMode::Draft);deal(g,cards({10,11,12,13,14},true));g.play();g.owned={0,1,2,3,4};
+        check(!g.takeDraft(0)&&!g.draftTaken&&g.passDraft()&&g.next(),"full relic slots preserve draft until the player passes or makes room");
+        g.newRun(5,RunMode::Echo,2);g.echoScale=1.37;g.echoHand=1;g.contract=3;g.contractChosen=true;g.handUse[1]=7;
+        check(g.save(path),"new modes save");Game restored(1);
+        check(restored.load(path)&&restored.mode==RunMode::Echo&&restored.starter==2&&restored.echoScale==1.37&&restored.echoHand==1&&restored.handUse[1]==7&&restored.contract==3,"mode, echo, challenge, and history survive save reload");
+        restored.owned.clear();restored.starter=0;check(restored.evaluate(cards({10,10})).total==54,"Echo counteracts the profile's favored hand in score previews");
+        {std::ifstream input(path);std::string saved((std::istreambuf_iterator<char>(input)),{});saved.replace(0,16,"NEON_ANTE_CPP 1\n");const auto at=saved.find("MODES ");saved.resize(at);std::ofstream oldSave(path);oldSave<<saved;}
+        Game legacy(1);check(legacy.load(path)&&legacy.mode==RunMode::Classic&&legacy.runSeed==0,"version-one runs migrate to Classic without losing the original cards");
+        g.newRun(55);g.handUse[5]=8;g.deck[0].foil=true;auto profile=captureBuild(g);
+        const auto buildPath=std::filesystem::path(path+".neonbuild");
+        check(exportBuild(profile,buildPath),"export shareable build");BuildProfile imported;
+        check(importBuild(buildPath,imported)&&imported.deck[0].foil&&imported.favoredHand()==5&&imported.owned==g.owned,"shared builds preserve actual deck, relics, and hand usage");
+        {std::ofstream bad(buildPath);bad<<"NEON_ANTE_BUILD 1\n123 0 -90\n";}
+        const auto oldSeed=imported.seed;check(!importBuild(buildPath,imported)&&imported.seed==oldSeed,"invalid build import leaves previous profile untouched");
+        BuildLibrary library;check(library.add(profile)&&!library.add(profile),"library deduplicates identical shared builds");
+        auto strongest=profile;strongest.seed=999;strongest.ante=20;library.add(strongest);
+        for(int i=0;i<12;++i){auto weaker=profile;weaker.seed=100+i;library.add(weaker);}
+        check(library.profiles.size()==8&&library.strongest()->seed==999&&library.strongest()->strength(8)<=1.8,"bounded archive retains strong builds and caps adaptive difficulty");
+        check(library.save(buildPath),"save build archive");BuildLibrary archiveCopy;check(archiveCopy.load(buildPath)&&archiveCopy.profiles.size()==8,"build archive round trip");
+        std::filesystem::remove(path);std::filesystem::remove(buildPath);
+
+        g.newRun(6);g.owned={0,12};const auto beforeReorder=g.evaluate(cards({13})).total;
+        check(beforeReorder==90&&g.moveRelic(0,1)&&g.evaluate(cards({13})).total==68,"moving an additive relic after a multiplier changes actual score");
+        check(!g.moveRelic(0,-1)&&!g.moveRelic(1,1)&&!g.moveRelic(0,0),"relic movement rejects invalid boundaries and direction");
+        check(g.save(path)&&loaded.load(path)&&loaded.owned==g.owned,"relic slot order survives save reload");std::filesystem::remove(path);
         // Exhaustive standard-deck frequencies independently verify category boundaries.
         std::array<int64_t, 10> counts{};
         std::vector<Card> v(5);

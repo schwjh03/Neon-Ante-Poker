@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <fstream>
 #include <set>
+#include <iomanip>
 
 namespace neon {
 template <class T> static void writeVector(std::ostream& out, const std::vector<T>& v) {
@@ -32,7 +33,7 @@ bool Game::save(const std::string& path) const {
     if (!out) {
         return false;
     }
-    out << "NEON_ANTE_CPP 1\n"
+    out << "NEON_ANTE_CPP 2\n"
         << static_cast<int>(phase) << ' ' << ante << ' ' << blind << ' ' << cash << ' ' << hands
         << ' ' << discards << ' ' << handBonus << ' ' << discardBonus << ' ' << round << ' '
         << rerolls << ' ' << reward << ' ' << interest << ' ' << bankReward << ' ' << score << ' '
@@ -53,6 +54,10 @@ bool Game::save(const std::string& path) const {
         out << o.type << ' ' << o.id << ' ' << o.cost << ' ' << o.sold << '\n';
     }
     out << rng << '\n';
+    out << std::setprecision(17);
+    out << "MODES " << static_cast<int>(mode) << ' ' << runSeed << ' ' << starter << ' ' << lastHandType << ' ' << rhythm << ' ' << playedMask << ' ' << discardsSpent << ' ' << contract << ' ' << contractChosen << ' ' << contractReward << ' ' << draftTaken << ' ' << archived << ' ' << echoScale << ' ' << echoHand << '\n';
+    for(int n:handUse){out<<n<<' ';}
+    out<<'\n';writeVector(out,draftChoices);
     out.close();
     if (!out) {
         return false;
@@ -73,7 +78,7 @@ bool Game::load(const std::string& path) {
     std::string magic;
     int version = 0, p = 0;
     Game g(1);
-    if (!(in >> magic >> version) || magic != "NEON_ANTE_CPP" || version != 1) {
+    if (!(in >> magic >> version) || magic != "NEON_ANTE_CPP" || (version != 1 && version != 2)) {
         return false;
     }
     if (!(in >> p >> g.ante >> g.blind >> g.cash >> g.hands >> g.discards >> g.handBonus >>
@@ -107,7 +112,16 @@ bool Game::load(const std::string& path) {
             return false;
         }
     }
-    if (!(in >> g.rng) || !g.valid()) {
+    if (!(in >> g.rng)) return false;
+    if(version==1)g.runSeed=0;
+    if(version==2){
+        std::string marker;int modeValue=0;
+        if(!(in>>marker>>modeValue>>g.runSeed>>g.starter>>g.lastHandType>>g.rhythm>>g.playedMask>>g.discardsSpent>>g.contract>>g.contractChosen>>g.contractReward>>g.draftTaken>>g.archived>>g.echoScale>>g.echoHand)||marker!="MODES"||modeValue<0||modeValue>3)return false;
+        g.mode=static_cast<RunMode>(modeValue);
+        for(int& n:g.handUse)if(!(in>>n))return false;
+        if(!readVector(in,g.draftChoices,3))return false;
+    }
+    if (!g.valid()) {
         return false;
     }
     g.last = {};
@@ -118,6 +132,10 @@ bool Game::load(const std::string& path) {
 }
 
 bool Game::valid() const {
+    if(static_cast<int>(mode)<0||static_cast<int>(mode)>3||starter<0||starter>2||lastHandType< -1||lastHandType>9||rhythm<0||rhythm>3||playedMask<0||playedMask>1023||discardsSpent<0||discardsSpent>5||contract<0||contract>5||contractReward<0||contractReward>5||!(echoScale>=1&&echoScale<=1.8)||echoHand< -1||echoHand>9)return false;
+    for(int n:handUse)if(n<0||n>1000000)return false;
+    std::set<int> draftIds;for(int id:draftChoices)if(id<0||id>=16||!draftIds.insert(id).second)return false;
+    if(mode!=RunMode::Draft && !draftTaken)return false;
     if (ante < 1 || ante > 10000 || blind < 0 || blind > 2 || cash < 0 || cash > 100000000 ||
         handBonus < 0 || handBonus > 2 || discardBonus < 0 || discardBonus > 2 || hands < 0 ||
         hands > 6 || discards < 0 || discards > 5 || round != ((ante - 1) * 3 + blind + 1) ||

@@ -27,8 +27,9 @@ Score Game::evaluate(const std::vector<Card>& cards) const {
     }
     int money = std::max(0, cash - ((boss() == 0 && !taxed) ? 2 : 0));
     for (int id : owned) {
-        int oldC = r.chips, oldM = r.mult;
-        double oldF = r.factor;
+        int oldC = r.chips;
+        double oldM = r.mult;
+        double relicFactor=1;
         switch (id) {
         case 0:
             for (auto c : active) {
@@ -44,7 +45,7 @@ Score Game::evaluate(const std::vector<Card>& cards) const {
             break;
         case 2:
             if (r.hand == Hand::Flush || r.hand == Hand::StraightFlush) {
-                r.factor *= 1.8;
+                relicFactor=1.8;
             }
             break;
         case 3:
@@ -93,13 +94,13 @@ Score Game::evaluate(const std::vector<Card>& cards) const {
                 king |= c.rank == 13;
             }
             if (ace && king) {
-                r.factor *= 2.1;
+                relicFactor=2.1;
             }
             break;
         }
         case 10:
             if (hands == 1) {
-                r.factor *= 3;
+                relicFactor=3;
             }
             break;
         case 11:
@@ -110,7 +111,7 @@ Score Game::evaluate(const std::vector<Card>& cards) const {
             }
             break;
         case 12:
-            r.factor *= 1.5;
+            relicFactor=1.5;
             break;
         case 13:
             if (cards.size() <= 3) {
@@ -121,21 +122,23 @@ Score Game::evaluate(const std::vector<Card>& cards) const {
             r.mult += round;
             break;
         }
-        if (oldC != r.chips || oldM != r.mult || oldF != r.factor) {
+        r.mult*=relicFactor;
+        if (oldC != r.chips || oldM != r.mult) {
             std::ostringstream effect;
             effect << relics[id].name << "  ";
             if (r.chips != oldC) {
                 effect << "+" << r.chips - oldC << " chips ";
             }
-            if (r.mult != oldM) {
-                effect << "+" << r.mult - oldM << " mult ";
-            }
-            if (r.factor != oldF) {
-                effect << "x" << std::setprecision(3) << r.factor / oldF;
-            }
+            if(relicFactor!=1)effect<<"x"<<relicFactor<<" mult ("<<multiplierText(oldM)<<" -> "<<multiplierText(r.mult)<<")";
+            else if(r.mult!=oldM)effect<<"+"<<multiplierText(r.mult-oldM)<<" mult";
             r.effects.push_back(effect.str());
         }
     }
+    if(starter==2 && lastHandType>=0 && lastHandType!=h){
+        const int nextRhythm=std::min(3,rhythm+1);r.factor*=1+nextRhythm*.12;
+        r.effects.push_back("Performer: varied hands, +"+std::to_string(nextRhythm*12)+"% score.");
+    }
+    if(mode==RunMode::Echo && h==echoHand){r.factor*=.85;r.effects.push_back("Echo studied this hand: score x0.85.");}
     r.total = std::max<int64_t>(1, static_cast<int64_t>(std::round(std::min(
                                        9e15, r.chips * static_cast<double>(r.mult) * r.factor))));
     return r;

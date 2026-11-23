@@ -29,7 +29,7 @@ try {
     $engineSources = @('src/game.cpp') + @(Get-ChildItem -Path 'src/engine' -Filter '*.cpp' |
         Sort-Object FullName | Select-Object -ExpandProperty FullName)
     $graphicsLibraries = @(
-        'build/libpheval.a', "$ray/lib/libraylib.a", '-lopengl32', '-lgdi32', '-lwinmm'
+        'build/libpheval.a', "$ray/lib/libraylib.a", '-lopengl32', '-lgdi32', '-lwinmm', '-lcomdlg32'
     )
 
     & $compiler @compilerFlags '-mwindows' @gameSources 'tests/ui_smoke.cpp' `

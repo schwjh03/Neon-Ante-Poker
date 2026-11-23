@@ -54,7 +54,7 @@ UiSmokeTest::UiSmokeTest(App& application, bool runTest) : app(application), ena
                   return app.game.owned.size() == 2;
               }},
              {"buy permanent foil",
-              {945, 640},
+              {1163, 574},
               [this] {
                   return std::count_if(app.game.deck.begin(), app.game.deck.end(), [](Card card) {
                              return card.foil;
@@ -122,7 +122,29 @@ UiSmokeTest::UiSmokeTest(App& application, bool runTest) : app(application), ena
               }},
              {"resume", {640, 280}, [this] {
                   return app.modal == Modal::None;
-              }}};
+              }},
+             {"open run modes",{550,38},[this]{return app.modal==Modal::RunSetup;}},
+             {"choose draft without replacing current run",{750,200},[this]{return app.modal==Modal::RunSetup&&app.game.mode==RunMode::Classic;}},
+             {"choose Planner before confirmation",{620,400},[this]{return app.game.starter==0;}},
+             {"configured run asks for confirmation",{975,675},[this]{return app.modal==Modal::ConfirmNewRun;}},
+             {"start draft Planner run",{640,425},[this]{return app.modal==Modal::None&&app.game.mode==RunMode::Draft&&app.game.starter==1&&app.game.discards==4;}},
+             {"open table challenges",{125,660},[this]{return app.modal==Modal::Contract;}},
+             {"choose first-hand challenge",{360,245},[this]{return app.modal==Modal::None&&app.game.contract==1;}},
+             {"draft run select one",{360,650},[this]{return app.game.selected.size()==1;}},
+             {"draft run select two",{480,650},[this]{return app.game.selected.size()==2;}},
+             {"draft run select three",{594,650},[this]{return app.game.selected.size()==3;}},
+             {"draft run select four",{711,650},[this]{return app.game.selected.size()==4;}},
+             {"draft run select five",{827,650},[this]{return app.game.selected.size()==5;}},
+             {"draft run wins challenge",{405,760},[this]{return app.game.phase==Phase::Shop&&app.game.contractReward==4&&!app.game.draftTaken;}},
+             {"open free relic draft",{640,748},[this]{return app.modal==Modal::Draft;}},
+             {"take a free relic",{315,515},[this]{return app.modal==Modal::None&&app.game.draftTaken&&app.game.owned.size()==2;}},
+             {"move first relic to the right",{450,135},[this]{return app.game.owned[1]==0;}},
+             {"move second relic back left",{503,135},[this]{return app.game.owned[0]==0;}},
+             {"advance with drafted build",{1100,748},[this]{return app.game.phase==Phase::Play&&app.game.blind==1&&app.game.discards==4;}},
+             {"reopen mode picker",{550,38},[this]{return app.modal==Modal::RunSetup;}},
+             {"close picker without changing run",{1095,103},[this]{return app.modal==Modal::Menu&&app.game.blind==1;}},
+             {"resume expanded run",{640,280},[this]{return app.modal==Modal::None;}}
+             };
     report.open("ui-smoke.txt");
 }
 
@@ -150,7 +172,7 @@ void UiSmokeTest::afterFrame(int frame) {
             return;
         }
     }
-    if (nextStep == steps.size() || frame > 600) {
+    if (nextStep == steps.size() || frame > 1100) {
         result = nextStep == steps.size() ? 0 : 3;
         done = true;
     }

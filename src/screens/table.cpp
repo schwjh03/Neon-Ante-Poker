@@ -17,15 +17,14 @@ void App::drawScorePreview() {
                         772, 317, 13, muted, true);
     ui.drawDisplayText(name, 772, 338, 34, result.total ? ink : Fade(ink, .8f), true);
     if (result.total) {
-        std::string chips = number(result.chips), mult = std::to_string(result.mult);
+        std::string chips = number(result.chips), mult = multiplierText(result.mult);
         ui.drawBox({552, 386, 112, 48}, {25, 63, 72, 255}, Fade(blue,.6f));
         ui.drawCenteredText(chips, 608, 393, 29, blue, true);
         ui.drawCenteredText("x", 684, 397, 23, muted);
         ui.drawBox({704, 386, 91, 48}, {72, 37, 42, 255}, Fade(coral,.6f));
         ui.drawCenteredText(mult, 749, 393, 29, coral, true);
-        std::ostringstream factor;
-        factor << "x" << std::fixed << std::setprecision(1) << result.factor;
-        ui.drawText(result.factor > 1 ? factor.str() + "  =" : "=", 812, 399, 20, muted);
+        const std::string factor="x"+multiplierText(result.factor);
+        ui.drawText(result.factor != 1 ? factor + "  =" : "=", 812, 399, 20, muted);
         ui.drawFittedText(number(result.total), {902, 390, 286, 45}, 35, gold, true);
         ui.drawCenteredText("CHIPS",608,438,11,muted,true);
         ui.drawCenteredText("MULTIPLIER",749,438,11,muted,true);
@@ -43,6 +42,8 @@ void App::drawScorePreview() {
             ui.drawSuit(i, {727 + i * 30.f, 409}, 9, Fade(muted, .65f));
         }
     }
+    if(game.mode==RunMode::Echo && game.echoHand>=0)ui.drawCenteredText("ECHO STUDIED: "+std::string(handNames[game.echoHand])+" / score x0.85",772,520,12,coral,true);
+    else if(game.starter==2)ui.drawCenteredText("PERFORMER: alternate hand types / rhythm "+std::to_string(game.rhythm)+" of 3",772,520,12,gold,true);
     if (!game.lastCards.empty()) {
         float cw = 46, gap = 8, span = game.lastCards.size() * (cw + gap) - gap;
         for (size_t i = 0; i < game.lastCards.size(); ++i) {

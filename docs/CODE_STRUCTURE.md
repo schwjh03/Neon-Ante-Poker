@@ -73,3 +73,9 @@ The screen files define `App` drawing methods; the engine files define `Game` me
 Run `./build.ps1 -Test` from PowerShell in the project folder. The build discovers source files recursively, so another `.cpp` file under `src/` is included automatically. Engine-only tests compile `game.cpp` and the files under `src/engine/`; they do not need a window or audio device.
 
 Keep the vendor files unchanged. Apply the included `.clang-format` to first-party C++ files when using an editor or formatter that supports it.
+
+## Modes and shared builds
+
+`src/engine/modes.cpp` handles one-time table challenges and relic drafts. `src/screens/run_modes.cpp` draws run setup, challenge choices, and draft selection. `src/engine/build_profiles.cpp` validates and stores deck snapshots; `src/build_dialogs.cpp` supplies Windows file dialogs. Echo difficulty uses local and deliberately imported snapshots, rather than a server or automatic telemetry.
+
+Relic scoring iterates the owned slot order. Multiplication changes the running multiplier immediately, so later additive bonuses are not retroactively multiplied.

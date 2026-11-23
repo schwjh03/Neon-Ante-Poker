@@ -1,4 +1,6 @@
 #include "game.hpp"
+#include <sstream>
+#include <iomanip>
 
 namespace neon {
 const std::array<const char*, 10> handNames = {
@@ -14,17 +16,17 @@ const std::array<const char*, 5> bossRules = {
 const std::array<Relic, 16> relics = {
     {{"Chrome Smile", "Face cards give +3 mult each.", 4, 0},
      {"Static Jacket", "Pairs and Two Pairs give +45 chips.", 5, 1},
-     {"Glass Dealer", "Flushes score x1.8.", 6, 2},
+     {"Glass Dealer", "Flushes: current multiplier x1.8.", 6, 2},
      {"Lucky Teeth", "Each 7 gives +11 mult.", 5, 3},
      {"Ace Engine", "Aces give +26 chips and +2 mult.", 6, 0},
      {"Signal Crown", "Straights give +70 chips and +3 mult.", 7, 3},
      {"Afterimage", "Five cards played gives +5 mult.", 5, 2},
      {"Debt Collector", "Every $2 held gives +1 mult.", 8, 1},
      {"Blue Wire", "Spades give +9 chips. Clubs give +2 mult.", 5, 0},
-     {"Royal Static", "An Ace and King together score x2.1.", 9, 3},
-     {"Last Light", "The last hand of a blind scores x3.", 7, 1},
+     {"Royal Static", "An Ace + King: current multiplier x2.1.", 9, 3},
+     {"Last Light", "Last hand: current multiplier x3.", 7, 1},
      {"Blood Moon", "Each red card gives +4 mult.", 7, 1},
-     {"Compound", "Every hand scores x1.5.", 9, 2},
+     {"Compound", "Current multiplier x1.5.", 9, 2},
      {"Pocket Reactor", "Three or fewer cards gives +80 chips.", 6, 0},
      {"Deep Pockets", "Cleared blinds pay an extra $3.", 5, 3},
      {"Feedback Loop", "Gain +1 mult per blind reached.", 8, 2}}};
@@ -36,6 +38,8 @@ std::string number(int64_t n) {
     }
     return s;
 }
+
+std::string multiplierText(double n){std::ostringstream out;out<<std::fixed<<std::setprecision(2)<<n;auto value=out.str();while(value.size()>1&&value.back()=='0')value.pop_back();if(value.back()=='.')value.pop_back();return value;}
 
 std::string rankName(int r) {
     return r <= 10 ? std::to_string(r) : std::string(1, "JQKA"[r - 11]);

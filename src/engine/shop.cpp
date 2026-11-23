@@ -90,6 +90,12 @@ bool Game::sell(int index) {
     return true;
 }
 
+bool Game::moveRelic(int index,int direction){
+    if((phase!=Phase::Play&&phase!=Phase::Shop)||(direction!=-1&&direction!=1)||index<0||index>=static_cast<int>(owned.size()))return false;
+    const int next=index+direction;if(next<0||next>=static_cast<int>(owned.size()))return false;
+    std::swap(owned[index],owned[next]);message="Relics resolve from left to right.";return true;
+}
+
 bool Game::reroll() {
     if (phase != Phase::Shop || cash < 3 + rerolls) {
         return false;

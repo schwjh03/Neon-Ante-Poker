@@ -3,3 +3,6 @@ release/
 *.save
 *.save.tmp
 .vscode/
+
+/*.png
+qa/

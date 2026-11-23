@@ -7,6 +7,7 @@
 
 namespace neon {
 enum class Phase { Play, Shop, Lost, Won };
+enum class RunMode { Classic, Daily, Draft, Echo };
 enum class Hand {
     High,
     Pair,
@@ -44,7 +45,7 @@ struct Offer {
 struct Score {
     Hand hand = Hand::High;
     int chips = 0;
-    int mult = 0;
+    double mult = 0;
     double factor = 1;
     int64_t total = 0;
     std::vector<std::string> effects;
@@ -55,6 +56,7 @@ extern const std::array<const char*, 10> handNames;
 extern const std::array<int, 10> baseChips, baseMult;
 extern const std::array<const char*, 5> bossNames, bossRules;
 std::string number(int64_t n);
+std::string multiplierText(double n);
 std::string rankName(int rank);
 Hand classify(const std::vector<Card>& cards);
 
@@ -89,9 +91,34 @@ public:
     Score last;
     std::string message;
     std::mt19937 rng;
+    RunMode mode = RunMode::Classic;
+    uint32_t runSeed = 0;
+    int starter = 0;
+    int lastHandType = -1;
+    int rhythm = 0;
+    int playedMask = 0;
+    int discardsSpent = 0;
+    int contract = 0;
+    bool contractChosen = false;
+    int contractReward = 0;
+    bool draftTaken = true;
+    bool archived = false;
+    std::vector<int> draftChoices;
+    std::array<int, 10> handUse{};
+    double echoScale = 1;
+    int echoHand = -1;
 
     explicit Game(uint32_t seed = std::random_device{}());
-    void newRun(uint32_t seed);
+    void newRun(uint32_t seed, RunMode newMode = RunMode::Classic, int newStarter = 0);
+    std::string modeName() const;
+    std::string starterName() const;
+    bool chooseContract(int id);
+    bool canChooseContract() const;
+    int completedContract(const Score& result, size_t cardCount) const;
+    std::string contractName() const;
+    void prepareDraft();
+    bool takeDraft(int index);
+    bool passDraft();
     int boss() const;
     int64_t target() const;
     std::string blindName() const;
@@ -108,6 +135,7 @@ public:
     void makeShop();
     bool buy(int index);
     bool sell(int index);
+    bool moveRelic(int index,int direction);
     bool reroll();
     std::string offerName(const Offer& o) const;
     std::string offerDescription(const Offer& o) const;

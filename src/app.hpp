@@ -3,13 +3,14 @@
 #include "audio.hpp"
 #include "game.hpp"
 #include "ui.hpp"
+#include "build_profiles.hpp"
 #include <array>
 #include <string>
 #include <vector>
 
 namespace neon {
 
-enum class Modal { None, Menu, HandReference, Deck, Relic, ConfirmNewRun, ScoreDetails };
+enum class Modal { None, Menu, HandReference, Deck, Relic, ConfirmNewRun, ScoreDetails, RunSetup, Contract, Draft };
 
 struct Particle {
     Vector2 position;
@@ -43,6 +44,10 @@ private:
     float noticeTimer = 0;
     std::vector<Particle> particles;
     std::string savePath;
+    std::filesystem::path libraryPath;
+    BuildLibrary library;
+    int pendingMode=0, pendingStarter=0;
+    std::string setupMessage;
 
     void updateAnimations(float deltaTime);
     void handleKeyboard();
@@ -64,5 +69,9 @@ private:
     void drawRelicDialog();
     void drawNewRunDialog();
     void drawMenuDialog();
+    void drawRunSetup();
+    void drawContractDialog();
+    void drawDraftDialog();
+    void startConfiguredRun();
 };
 } // namespace neon

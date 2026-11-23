@@ -18,14 +18,26 @@ App::App(bool testing) : previewSession(testing) {
 
     std::error_code error;
     std::filesystem::create_directories(directory, error);
-    savePath = (directory / "run.save").string();
-    game.load(savePath);
+    savePath = (directory / "run-v2.save").string();
+    libraryPath=directory / "build-library.txt";library.load(libraryPath);
+    if(!game.load(savePath)){
+        const bool migrate=!std::filesystem::exists(savePath)&&game.load((directory/"run.save").string());
+        if(!migrate)modal=Modal::RunSetup;
+    }
+    pendingMode=static_cast<int>(game.mode);pendingStarter=game.starter;
     saveFailed = static_cast<bool>(error);
 }
 
 void App::saveRun() {
     if (!previewSession) {
-        saveFailed = !game.save(savePath);
+        bool archiveOK=true;
+        if((game.phase==Phase::Lost||game.phase==Phase::Won)&&!game.archived){
+            BuildLibrary nextLibrary=library;
+            if(!nextLibrary.add(captureBuild(game)))game.archived=true;
+            else if(nextLibrary.save(libraryPath)){library=std::move(nextLibrary);game.archived=true;}
+            else archiveOK=false;
+        }
+        saveFailed = !game.save(savePath)||!archiveOK;
     }
 }
 
@@ -208,6 +220,9 @@ void App::drawDialogs() {
             drawMenuDialog();
         }
         break;
+    case Modal::RunSetup:drawRunSetup();break;
+    case Modal::Contract:drawContractDialog();break;
+    case Modal::Draft:drawDraftDialog();break;
     case Modal::ConfirmNewRun:
         drawNewRunDialog();
         break;

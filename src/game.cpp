@@ -8,13 +8,15 @@ Game::Game(uint32_t seed) {
     newRun(seed);
 }
 
-void Game::newRun(uint32_t seed) {
+void Game::newRun(uint32_t seed, RunMode newMode, int newStarter) {
+    mode=newMode;starter=std::clamp(newStarter,0,2);runSeed=seed;archived=false;handUse.fill(0);echoScale=1;echoHand=-1;
     rng.seed(seed);
     phase = Phase::Play;
     ante = round = 1;
     blind = 0;
     cash = 6;
-    handBonus = discardBonus = 0;
+    handBonus = 0;discardBonus = starter==1?1:0;
+    if(starter==1)cash=4;
     score = best = lifetime = 0;
     endless = false;
     levels.fill(1);
@@ -34,7 +36,7 @@ int Game::boss() const {
 int64_t Game::target() const {
     const int b[] = {300, 475, 720};
     return static_cast<int64_t>(std::round(
-        std::min(9e14, b[blind] * std::pow(1.55, ante - 1) * (boss() == 4 ? 1.28 : 1.0))));
+        std::min(9e14, b[blind] * echoScale * std::pow(1.55, ante - 1) * (boss() == 4 ? 1.28 : 1.0))));
 }
 
 std::string Game::blindName() const {
@@ -43,6 +45,7 @@ std::string Game::blindName() const {
 
 void Game::startBlind() {
     phase = Phase::Play;
+    lastHandType=-1;rhythm=0;playedMask=0;discardsSpent=0;contract=0;contractChosen=false;contractReward=0;draftChoices.clear();draftTaken=true;
     score = 0;
     hands = 4 + handBonus;
     discards = boss() == 3 ? 0 : 3 + discardBonus;
@@ -123,14 +126,18 @@ bool Game::play() {
         message = "Velvet Lock demands exactly five cards.";
         return false;
     }
+    contractChosen=true;
     lastCards = selectedCards();
     last = evaluate(lastCards);
+    const int handType=static_cast<int>(last.hand);
+    rhythm=lastHandType>=0&&lastHandType!=handType?std::min(3,rhythm+1):0;lastHandType=handType;
+    playedMask|=1<<handType;++handUse[handType];
     if (boss() == 0 && !taxed) {
         cash = std::max(0, cash - 2);
         taxed = true;
     }
     score += last.total;
-    lifetime += last.total;
+    lifetime = std::min<int64_t>(9000000000000000000LL,lifetime+last.total);
     best = std::max(best, last.total);
     --hands;
     removeSelected();
@@ -142,11 +149,13 @@ bool Game::play() {
             bankReward += 3;
         }
         interest = std::min(5, cash / 5);
-        reward = bankReward + hands + interest;
+        contractReward=completedContract(last,lastCards.size());
+        reward = bankReward + hands + interest + contractReward;
         cash += reward;
         phase = (ante == 8 && blind == 2 && !endless) ? Phase::Won : Phase::Shop;
         rerolls = 0;
         makeShop();
+        prepareDraft();
         message = "Blind cleared. +$" + std::to_string(reward) + " earned.";
     } else if (hands == 0 || hand.empty()) {
         phase = Phase::Lost;
@@ -159,6 +168,7 @@ bool Game::discard() {
     if (phase != Phase::Play || discards <= 0 || selected.empty()) {
         return false;
     }
+    contractChosen=true;++discardsSpent;
     --discards;
     removeSelected();
     message = "Fresh cards dealt.";
@@ -167,13 +177,14 @@ bool Game::discard() {
 
 bool Game::next() {
     if (phase == Phase::Won) {
-        endless = true;
+        endless = true;archived=false;
         phase = Phase::Shop;
         return true;
     }
     if (phase != Phase::Shop) {
         return false;
     }
+    if(mode==RunMode::Draft&&!draftTaken){message="Choose a free relic draft or pass first.";return false;}
     ++blind;
     ++round;
     if (blind == 3) {

@@ -66,11 +66,11 @@ void App::drawScoreDialog() {
     Score r = game.selected.empty() ? game.last : game.preview();
     ui.drawBox({359, 145, 562, 510}, panel, line);
     ui.drawText(handNames[static_cast<int>(r.hand)], 391, 175, 30, ink, true);
-    ui.drawText(number(r.chips) + " chips  x  " + std::to_string(r.mult) + " mult", 391, 229, 25,
+    ui.drawText(number(r.chips) + " chips  x  " + multiplierText(r.mult) + " mult", 391, 229, 25,
                 blue, true);
-    if (r.factor > 1) {
+    if (r.factor != 1) {
         std::ostringstream f;
-        f << "Relic multiplier: x" << std::setprecision(3) << r.factor;
+        f << "Mode modifier: x" << std::setprecision(3) << r.factor;
         ui.drawText(f.str(), 391, 271, 20, coral, true);
     }
     for (size_t i = 0; i < r.effects.size(); ++i) {
@@ -91,7 +91,13 @@ void App::drawRelicDialog() {
     ui.drawBox({418, 170, 444, 432}, panel, a);
     ui.drawRelicEmblem(id, {640, 254}, 45, a);
     ui.drawCenteredText(relics[id].name, 640, 328, 31, ink, true);
-    ui.drawWrappedText(relics[id].description, {461, 383, 358, 70}, 20, muted);
+    ui.drawWrappedText(relics[id].description, {461, 378, 358, 45}, 17, muted);
+    if(ui.button({458,435,171,32},"Move left",mint,false,relicDetailIndex>0)){
+        finishAction(game.moveRelic(relicDetailIndex,-1));--relicDetailIndex;
+    }
+    if(ui.button({651,435,171,32},"Move right",mint,false,relicDetailIndex+1<static_cast<int>(game.owned.size()))){
+        finishAction(game.moveRelic(relicDetailIndex,1));++relicDetailIndex;
+    }
     if (game.phase == Phase::Shop) {
         if (ui.button({458, 477, 364, 44}, "Sell  $" + std::to_string(relics[id].cost / 2),
                       coral)) {
@@ -109,10 +115,7 @@ void App::drawNewRunDialog() {
     ui.drawCenteredText("Start a new run?", 640, 272, 28, ink, true);
     ui.drawWrappedText("Your current run will be replaced.", {467, 328, 346, 60}, 19, muted);
     if (ui.button({468, 401, 344, 47}, "Start new run", coral, true)) {
-        game.newRun(std::random_device{}());
-        cardLift.fill(0);
-        modal = Modal::None;
-        finishAction(true, 3);
+        startConfiguredRun();
     }
     if (ui.button({468, 469, 344, 43}, "Keep playing", mint)) {
         modal = Modal::Menu;
@@ -127,7 +130,7 @@ void App::drawMenuDialog() {
         modal = Modal::None;
     }
     if (ui.button({468, 324, 344, 45}, "New run", gold)) {
-        modal = Modal::ConfirmNewRun;
+        pendingMode=static_cast<int>(game.mode);pendingStarter=game.starter;modal = Modal::ConfirmNewRun;
     }
     if (ui.button({468, 385, 344, 45}, audio.muted ? "Sound off" : "Sound on", blue)) {
         audio.muted = !audio.muted;
@@ -135,7 +138,7 @@ void App::drawMenuDialog() {
     if (ui.button({468, 446, 344, 45}, "Hand reference", mint)) {
         modal = Modal::HandReference;
     }
-    if (ui.button({468, 507, 344, 45}, "Save and quitRequested", coral)) {
+    if (ui.button({468, 507, 344, 45}, "Save & quit", coral)) {
         saveRun();
         if (!saveFailed) {
             quitRequested = true;
