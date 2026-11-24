@@ -23,22 +23,22 @@ void App::drawRunSetup(){
     for(int i=0;i<4;++i){
         Rectangle r={168+i*237.f,148,218,125};ui.drawBox(r,pendingMode==i?Color{39,59,66,255}:bg,pendingMode==i?gold:line);
         ui.drawDisplayText(titles[i],r.x+14,r.y+13,23,pendingMode==i?gold:ink);
-        ui.drawWrappedText(descriptions[i],{r.x+14,r.y+51,190,65},15,muted);
+        ui.drawWrappedText(descriptions[i],{r.x+14,r.y+51,190,65},16,muted);
         if(ui.wasClicked(r))pendingMode=i;
     }
-    ui.drawText(pendingMode==1?"Daily seed: "+utcDay()+" UTC / "+std::to_string(dailySeedFor(utcDay())):"Modes change the run rules. Starting styles change how you build.",168,289,15,muted);
-    ui.drawText("STARTING STYLE",168,330,13,gold,true);
+    ui.drawText(pendingMode==1?"Daily seed: "+utcDay()+" UTC / "+std::to_string(dailySeedFor(utcDay())):"Modes change the run rules. Starting styles change how you build.",168,289,16,muted);
+    ui.drawText("STARTING STYLE",168,330,16,gold,true);
     const char* starters[]={"Balanced","Planner","Performer"};
     const char* perks[]={"$6 and Chrome Smile. A flexible start.","$4, Chrome Smile, and one extra discard every blind.","$6 and Chrome Smile. Alternate hand types to build a score bonus, up to +36%."};
     for(int i=0;i<3;++i){
         Rectangle r={168+i*316.f,356,296,107};ui.drawBox(r,pendingStarter==i?Color{39,59,66,255}:bg,pendingStarter==i?gold:line);
-        ui.drawText(starters[i],r.x+15,r.y+12,21,ink,true);ui.drawWrappedText(perks[i],{r.x+15,r.y+45,264,52},15,muted);
+        ui.drawText(starters[i],r.x+15,r.y+12,21,ink,true);ui.drawWrappedText(perks[i],{r.x+15,r.y+45,264,52},16,muted);
         if(ui.wasClicked(r))pendingStarter=i;
     }
     const auto* echo=library.strongest();
-    ui.drawText("BUILD LIBRARY  /  "+std::to_string(library.profiles.size())+" of 8 snapshots",168,489,13,gold,true);
+    ui.drawText("BUILD LIBRARY  /  "+std::to_string(library.profiles.size())+" of 8 snapshots",168,489,16,gold,true);
     ui.drawText(echo?echo->summary():"No completed runs yet. Echo starts at a +10% target.",168,516,18,ink);
-    ui.drawWrappedText("Completed runs stay on this computer. Import a friend's .neonbuild file to include their deck, relics, and hand history. No automatic uploads or online leaderboard.",{168,545,900,42},15,muted);
+    ui.drawWrappedText("Completed runs stay on this computer. Import a friend's .neonbuild file to include their deck, relics, and hand history. No automatic uploads or online leaderboard.",{168,545,900,42},16,muted);
     if(ui.button({168,600,190,38},"Export current build",blue)){
         const auto file=chooseBuildFile(true);if(!file.empty())setupMessage=exportBuild(captureBuild(game),file)?"Build exported. Share the file yourself.":"Export failed. Check the selected folder.";
     }
@@ -52,7 +52,7 @@ void App::drawRunSetup(){
     }
     if(ui.button({838,652,276,47},"Start this run",gold,true))modal=Modal::ConfirmNewRun;
     if(ui.button({168,652,190,43},"Keep playing",mint))modal=Modal::None;
-    ui.drawFittedText(setupMessage,{580,601,530,38},15,muted);
+    ui.drawFittedText(setupMessage,{580,601,530,38},16,muted);
 }
 void App::drawContractDialog(){
     ui.drawBox({140,83,1000,630},panel,line);ui.drawDisplayText("A little extra on the table",168,106,31,ink);

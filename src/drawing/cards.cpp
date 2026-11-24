@@ -43,7 +43,7 @@ void Ui::drawStar(Vector2 p, float radius, Color c) {
 void Ui::drawCard(const Card& c, Rectangle r, bool selected, bool dim, bool back) {
     const float k = r.width / 92.f;
     const float cx = r.x + r.width / 2, cy = r.y + r.height * .51f;
-    const Color paper = dim ? Color{187, 191, 184, 255} : Color{250, 247, 235, 255};
+    const Color paper = dim ? Color{187, 191, 184, 255} : Color{255, 252, 240, 255};
     const Color paint = c.wild ? Color{26, 112, 117, 255}
         : (c.suit == 1 || c.suit == 2) ? Color{174, 49, 54, 255} : Color{27, 42, 57, 255};
     drawBox({r.x + 1, r.y + 7, r.width, r.height}, {2, 7, 15, 125}, BLANK, .1f);
@@ -64,6 +64,10 @@ void Ui::drawCard(const Card& c, Rectangle r, bool selected, bool dim, bool back
         drawSuit(3,{cx,cy-2*k},17*k,gold);
         return;
     }
+    DrawRectangleRoundedLinesEx({r.x+3*k,r.y+3*k,r.width-6*k,r.height-6*k},.08f,8,.8f*k,Fade(paint,.22f));
+    // Small engraved corner flourishes retain contrast with the printed rank.
+    DrawLineEx({r.x+25*k,r.y+8*k},{r.x+r.width-9*k,r.y+8*k},.7f*k,Fade(paint,.25f));
+    DrawLineEx({r.x+9*k,r.y+r.height-9*k},{r.x+r.width-25*k,r.y+r.height-9*k},.7f*k,Fade(paint,.25f));
     DrawLineEx({r.x+7*k,r.y+2*k},{r.x+r.width-7*k,r.y+2*k},k,WHITE);
     drawDisplayText(rankName(c.rank),r.x+7*k,r.y+3*k,23*k,paint);
     drawSuit(c.suit,{r.x+14*k,r.y+36*k},6*k,paint);
@@ -101,7 +105,10 @@ void Ui::drawCard(const Card& c, Rectangle r, bool selected, bool dim, bool back
         }
         drawSuit(c.suit,{cx,cy},5*k,gold);
     } else if(c.rank==14) {
+        DrawCircleLinesV({cx,cy},29*k,Fade(paint,.25f));
+        for(int side:{-1,1})for(int j=0;j<4;++j){const float x=cx+side*(23+j*2)*k,y=cy+(12-j*9)*k;DrawLineEx({x,y},{x+side*7*k,y-5*k},1*k,Fade(paint,.6f));}
         drawSuit(c.suit,{cx,cy},23*k,paint);
+        drawDisplayText("A",cx,cy+25*k,12*k,paint,true);
         DrawLineEx({cx-12*k,cy+35*k},{cx+12*k,cy+35*k},.8f*k,Fade(paint,.45f));
     } else {
         auto pip=[&](float x,float y){drawSuit(c.suit,{cx+x*k,cy+y*k},6.8f*k,paint);};

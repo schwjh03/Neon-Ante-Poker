@@ -11,10 +11,11 @@ void App::drawScorePreview() {
     Score result = choosing ? game.preview() : game.last;
     std::string name =
         result.total ? handNames[static_cast<int>(result.hand)] : "The table is open";
+    ui.drawBox({516,308,696,153},{10,29,42,235},Fade(blue,.3f),.12f);
     ui.drawCenteredText(choosing       ? "SELECTED HAND"
                         : result.total ? "LAST HAND"
                                        : "ROUND " + std::to_string(game.round),
-                        772, 317, 13, muted, true);
+                        772, 317, 16, muted, true);
     ui.drawDisplayText(name, 772, 338, 34, result.total ? ink : Fade(ink, .8f), true);
     if (result.total) {
         std::string chips = number(result.chips), mult = multiplierText(result.mult);
@@ -26,9 +27,9 @@ void App::drawScorePreview() {
         const std::string factor="x"+multiplierText(result.factor);
         ui.drawText(result.factor != 1 ? factor + "  =" : "=", 812, 399, 20, muted);
         ui.drawFittedText(number(result.total), {902, 390, 286, 45}, 35, gold, true);
-        ui.drawCenteredText("CHIPS",608,438,11,muted,true);
-        ui.drawCenteredText("MULTIPLIER",749,438,11,muted,true);
-        ui.drawText("HAND SCORE",902,438,11,muted,true);
+        ui.drawCenteredText("CHIPS",608,438,16,muted,true);
+        ui.drawCenteredText("MULTIPLIER",749,438,16,muted,true);
+        ui.drawText("HAND SCORE",902,438,16,muted,true);
         if (!choosing && scoreAnimation > 0) {
             ui.drawCenteredText("+" + number(result.total), 1080, 450 - scoreAnimation * 35, 28,
                                 Fade(gold, scoreAnimation), true);
@@ -39,47 +40,47 @@ void App::drawScorePreview() {
         ui.showTooltip("Score details", {1204, 341, 36, 32});
     } else {
         for (int i = 0; i < 4; ++i) {
-            ui.drawSuit(i, {727 + i * 30.f, 409}, 9, Fade(muted, .65f));
+            ui.drawSuit(i, {727 + i * 30.f, 409}, 9, muted);
         }
     }
-    if(game.mode==RunMode::Echo && game.echoHand>=0)ui.drawCenteredText("ECHO STUDIED: "+std::string(handNames[game.echoHand])+" / score x0.85",772,520,12,coral,true);
-    else if(game.starter==2)ui.drawCenteredText("PERFORMER: alternate hand types / rhythm "+std::to_string(game.rhythm)+" of 3",772,520,12,gold,true);
+    if(game.mode==RunMode::Echo && game.echoHand>=0)ui.drawCenteredText("ECHO STUDIED: "+std::string(handNames[game.echoHand])+" / score x0.85",772,520,16,coral,true);
+    else if(game.starter==2)ui.drawCenteredText("PERFORMER: alternate hand types / rhythm "+std::to_string(game.rhythm)+" of 3",772,520,16,gold,true);
     if (!game.lastCards.empty()) {
-        float cw = 46, gap = 8, span = game.lastCards.size() * (cw + gap) - gap;
+        float cw = 36, gap = 8, span = game.lastCards.size() * (cw + gap) - gap;
         for (size_t i = 0; i < game.lastCards.size(); ++i) {
-            ui.drawCard(game.lastCards[i], {772 - span / 2 + i * (cw + gap), 448, cw, 67}, false,
+            ui.drawCard(game.lastCards[i], {772 - span / 2 + i * (cw + gap), 466, cw, 52}, false,
                         true);
         }
     } else {
         DrawLine(636, 471, 908, 471, Fade(muted, .14f));
-        ui.drawCenteredText("NEON ANTE  /  CARD CLUB", 772, 480, 13, Fade(muted, .65f), true);
+        ui.drawCenteredText("BUILD YOUR HAND. BREAK THE HOUSE.", 772, 480, 16, muted, true);
     }
 }
 
 void App::drawTable() {
     for (int i = 0; i < 3; ++i) {
         float x = 292 + i * 321.f;
-        Color c = i == game.blind ? mint : Fade(muted, .4f);
+        Color c = i == game.blind ? mint : muted;
         ui.drawText(std::to_string(i + 1) + "  " +
                         std::array<const char*, 3>{"SMALL BLIND", "BIG BLIND", "BOSS BLIND"}[i],
-                    x, 267, 13, c, true);
+                    x, 267, 16, c, true);
         DrawRectangle(static_cast<int>(x), 294, 302, 2, i == game.blind ? mint : Fade(line, .7f));
     }
     drawScorePreview();
-    ui.drawText("YOUR HAND", 292, 537, 13, muted, true);
-    ui.drawText(std::to_string(game.selected.size()) + " / 5 SELECTED", 1062, 537, 13, muted, true);
+    ui.drawText("YOUR HAND", 292, 537, 16, muted, true);
+    ui.drawText(std::to_string(game.selected.size()) + " / 5 SELECTED", 1062, 537, 16, muted, true);
     float cw = 104, gap = 13, span = game.hand.size() * (cw + gap) - gap, start = 772 - span / 2;
     for (size_t i = 0; i < game.hand.size(); ++i) {
         int id = game.hand[i];
         bool sel = std::find(game.selected.begin(), game.selected.end(), id) != game.selected.end();
-        Rectangle r = {start + i * (cw + gap), 577 - cardLift[id], cw, 145};
+        Rectangle r = {start + i * (cw + gap), 573 - cardLift[id], cw, 145};
         bool hot = ui.isHovered(r);
         if (hot) {
             r.y -= 4;
         }
         ui.drawCard(game.deck[id], r, sel, game.boss() == 2 && game.deck[id].suit == 2);
-        ui.drawBox({r.x+cw/2-9, 724,18,14},Fade(bg,.8f),Fade(line,.7f),.15f);
-        ui.drawCenteredText(std::to_string(i+1),r.x+cw/2,725,10,muted,true);
+        ui.drawBox({r.x+cw/2-12, 721,24,18},Fade(bg,.8f),Fade(line,.7f),.15f);
+        ui.drawCenteredText(std::to_string(i+1),r.x+cw/2,725,16,muted,true);
         if (ui.wasClicked(r) && screenTransition <= 0) {
             finishAction(game.toggle(id));
         }
@@ -104,7 +105,7 @@ void App::drawTable() {
     if (ui.button({535, 742, 174, 42}, "Discard", coral, false, valid && game.discards > 0)) {
         finishAction(game.discard(), 1);
     }
-    ui.drawText("SORT", 755, 755, 13, muted, true);
+    ui.drawText("SORT", 755, 755, 16, muted, true);
     if (ui.button({805, 742, 92, 42}, "Rank", blue, !sortBySuit)) {
         game.sort(false);
         sortBySuit = false;

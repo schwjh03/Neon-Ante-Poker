@@ -1,3 +1,12 @@
+## 1.2.0 — Readability and the midnight table
+
+- Larger system type, heavier body text, brighter labels and clearer disabled controls.
+- Stitched felt table with padded rail, dealer chip, chip stacks and an illustrated draw deck.
+- Engraved playing cards, clearer selection, and sixteen distinct relic emblems.
+- Separate colored market displays with more space for descriptions.
+- Tooltips show complete rules at a readable size; long fitted labels stay inside their bounds.
+- Existing saved runs, scoring rules and build files remain compatible with 1.1.
+
 # Changes
 
 ## 1.1.0

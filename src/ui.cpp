@@ -9,7 +9,7 @@ void Ui::loadFonts() {
     const char* windowsDirectory = std::getenv("WINDIR");
     std::string fontDirectory =
         std::string(windowsDirectory ? windowsDirectory : "C:/Windows") + "/Fonts/";
-    regular = LoadFontEx((fontDirectory + "segoeui.ttf").c_str(), 48, nullptr, 0);
+    regular = LoadFontEx((fontDirectory + "seguisb.ttf").c_str(), 48, nullptr, 0);
     bold = LoadFontEx((fontDirectory + "segoeuib.ttf").c_str(), 72, nullptr, 0);
     display = LoadFontEx((fontDirectory + "georgiab.ttf").c_str(), 96, nullptr, 0);
 
@@ -54,9 +54,9 @@ void Ui::finishFrame() {
     if (!tooltip.empty()) {
         float tooltipWidth = std::min(390.f, measureText(tooltip, 16) + 28);
         float x = std::clamp(mouse.x - tooltipWidth / 2, 8.f, 1272 - tooltipWidth);
-        float y = std::clamp(mouse.y - 77, 8.f, 720.f);
-        drawBox({x, y, tooltipWidth, 61}, {9, 16, 22, 250}, line);
-        drawWrappedText(tooltip, {x + 12, y + 10, tooltipWidth - 24, 46}, 16, ink);
+        float y = std::clamp(mouse.y - 125, 8.f, 670.f);
+        drawBox({x, y, tooltipWidth, 115}, {9, 16, 22, 250}, line);
+        drawWrappedText(tooltip, {x + 12, y + 10, tooltipWidth - 24, 95}, 18, ink);
     }
     SetMouseCursor(handCursor ? MOUSE_CURSOR_POINTING_HAND : MOUSE_CURSOR_DEFAULT);
 }

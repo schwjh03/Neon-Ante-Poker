@@ -41,9 +41,9 @@ void App::drawHandReferenceDialog() {
         modal = Modal::None;
         return;
     }
-    ui.drawText("HAND", 304, 163, 13, muted, true);
-    ui.drawText("LEVEL", 611, 163, 13, muted, true);
-    ui.drawText("CHIPS  x  MULT", 749, 163, 13, muted, true);
+    ui.drawText("HAND", 304, 163, 16, muted, true);
+    ui.drawText("LEVEL", 611, 163, 16, muted, true);
+    ui.drawText("CHIPS  x  MULT", 749, 163, 16, muted, true);
     for (int i = 9; i >= 0; --i) {
         float y = 198 + (9 - i) * 38;
         DrawLine(302, static_cast<int>(y + 30), 978, static_cast<int>(y + 30), Fade(line, .65f));
@@ -59,7 +59,7 @@ void App::drawHandReferenceDialog() {
         {302, 592, 668, 95}, 17, muted);
     ui.drawText(
         "1-8 Select   Enter Play   Backspace Discard   R/S Sort   Esc Menu   F11 Fullscreen", 302,
-        696, 14, muted);
+        696, 16, muted);
 }
 
 void App::drawScoreDialog() {
@@ -125,7 +125,7 @@ void App::drawNewRunDialog() {
 void App::drawMenuDialog() {
     ui.drawBox({428, 130, 424, 540}, panel, line);
     ui.drawCenteredText("NEON ANTE", 640, 164, 36, ink, true);
-    ui.drawCenteredText("POKER", 640, 210, 15, mint, true);
+    ui.drawCenteredText("POKER", 640, 210, 16, mint, true);
     if (ui.button({468, 259, 344, 48}, "Resume", mint, true)) {
         modal = Modal::None;
     }

@@ -38,6 +38,8 @@ public:
     bool button(Rectangle bounds, const std::string& label, Color tint = theme::mint,
                 bool primary = false, bool enabled = true);
 
+    void drawTableSurface(bool market);
+    void drawChip(Vector2 center, float radius, Color color, int suit = 3);
     void drawSuit(int suit, Vector2 center, float size, Color color);
     void drawStar(Vector2 center, float radius, Color color);
     void drawCard(const Card& card, Rectangle bounds, bool selected = false, bool dim = false,

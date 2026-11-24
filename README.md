@@ -70,7 +70,7 @@ From PowerShell in this folder:
 .\build\NeonAntePoker.exe
 ```
 
-The build is offline. `build.ps1` compiles the poker evaluator, links the graphics library and C++ runtime statically, and writes the game to `build\NeonAntePoker.exe`. Runtime DLL dependencies are Windows system libraries only. The application uses installed Segoe UI and Georgia fonts, with a built-in font fallback, and generates its card art and sound effects in code.
+The build is offline. `build.ps1` compiles the poker evaluator, links the graphics library and C++ runtime statically, and writes the game to `build\NeonAntePoker.exe`. Runtime DLL dependencies are Windows system libraries only. The application uses installed Segoe UI Semibold and Georgia fonts, with a built-in font fallback, and generates its card art and sound effects in code.
 
 ## Verification
 
@@ -111,3 +111,7 @@ Screenshots can be generated without changing your save:
 The `.clang-format` file defines the project's four-space indentation and 100-column style. A formatter is optional and is not required to build the game. Version-1 saved runs migrate into Classic on first launch; the original run.save is retained, and the new version uses run-v2.save. Version-2 saves include mode, starting style, challenges, drafting, build history, and relic order. The older v1.0 executable cannot read the new save format.
 
 The poker rules are a custom single-player score-chasing variant, not a multiplayer betting simulator. This is an original game inspired by poker roguelikes; it contains no Balatro assets or code.
+
+### Readability and visual update (1.2)
+
+Labels use a 16px minimum at the 1280×800 game canvas; descriptions use at least 18px. Body text uses Segoe UI Semibold, and dim labels have brighter contrast. The table includes stitched felt, a dealer chip, chip stacks and a draw deck. Every relic now has its own emblem. All visuals are drawn locally in code; no network or asset download is needed.

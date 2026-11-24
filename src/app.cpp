@@ -157,18 +157,7 @@ void App::update(float deltaTime) {
 
 void App::render() {
     ui.beginFrame(modal == Modal::None && screenTransition <= 0);
-    ClearBackground({18, 43, 51, 255});
-    DrawRectangleGradientV(264, 74, 1016, 726, {21, 50, 58, 255}, {12, 31, 40, 255});
-    DrawEllipse(775, 447, 465, 196, {19, 45, 52, 255});
-    DrawEllipseLines(775, 447, 459, 190, {72, 103, 105, 90});
-    DrawEllipseLines(775, 447, 450, 181, {171, 147, 97, 45});
-    for (int y = 250; y < 735; y += 7) {
-        for (int x = 278; x < 1270; x += 11) {
-            const unsigned int grain = (x * 17u + y * 31u) % 11u;
-            if (grain < 3) DrawPixel(x, y, {132, 159, 155, 12});
-        }
-    }
-    DrawLine(280, 731, 1252, 731, {85, 110, 112, 90});
+    ui.drawTableSurface(game.phase==Phase::Shop);
 
     drawHeader();
     drawSidebar();
