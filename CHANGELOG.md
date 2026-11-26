@@ -1,5 +1,8 @@
 ## Browser edition (main)
 
+- Added a title menu with all four mode choices, three starting styles, and a separate Continue saved run button.
+- Show a validated save summary, confirm before replacing a run, and pause the table while the title menu is open.
+- Added Main menu above the table to save and return without reloading.
 - Play the same C++ game in a browser through WebAssembly, with all four modes and the full market.
 - Local browser autosaves, a saved build library, and validated build import/export.
 - Mouse and keyboard controls, a fullscreen button, openly licensed readable fonts, and browser audio.

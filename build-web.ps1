@@ -4,6 +4,8 @@ param(
     [switch]$TestEngine
 )
 $ErrorActionPreference = 'Stop'
+$priorEmConfig = $env:EM_CONFIG
+$priorSdkPython = $env:EMSDK_PYTHON
 Push-Location $PSScriptRoot
 try {
     $Emsdk = (Resolve-Path -LiteralPath $Emsdk).Path
@@ -13,6 +15,7 @@ try {
     $archiver = Join-Path $Emsdk 'upstream/emscripten/emar.py'
     if (-not $python -or -not (Test-Path -LiteralPath $compiler)) { throw 'Install and activate the Emscripten SDK first. See README.md.' }
     $env:EM_CONFIG = Join-Path $Emsdk '.emscripten'
+    $env:EMSDK_PYTHON = $python
     New-Item -ItemType Directory -Force build/web,docs | Out-Null
     $raySource = Join-Path $Raylib 'src'
     $rayObjects = @()
@@ -36,7 +39,7 @@ try {
     & $python $compiler '-std=c++17' '-O2' '-Wall' '-Wextra' '-Isrc' "-I$raySource" @sources `
         'build/web/libpheval.a' 'build/web/libraylib.a' '-sUSE_GLFW=3' '-sALLOW_MEMORY_GROWTH=1' `
         '-sINITIAL_MEMORY=67108864' '-sSTACK_SIZE=2097152' '-sENVIRONMENT=web' '-sFORCE_FILESYSTEM=1' `
-        '-sEXPORTED_FUNCTIONS=_main,_neon_import_build,_neon_export_build' '-sEXPORTED_RUNTIME_METHODS=ccall' `
+        '-sEXPORTED_FUNCTIONS=_main,_neon_import_build,_neon_export_build,_neon_begin_run,_neon_resume_run,_neon_return_title' '-sEXPORTED_RUNTIME_METHODS=ccall' `
         '-sASSERTIONS=1' '--preload-file' 'web/assets@/assets' '-o' 'docs/neon.js'
     if ($LASTEXITCODE -ne 0) { throw 'Browser game build failed.' }
     Copy-Item web/index.html,web/styles.css,web/browser.js -Destination docs
@@ -57,4 +60,8 @@ try {
         if ($LASTEXITCODE -ne 0) { throw 'WebAssembly engine tests failed.' }
     }
     Write-Output 'Built browser game in docs/ (index.html, neon.js, neon.wasm, neon.data).'
-} finally { Pop-Location }
+} finally {
+    $env:EM_CONFIG = $priorEmConfig
+    $env:EMSDK_PYTHON = $priorSdkPython
+    Pop-Location
+}

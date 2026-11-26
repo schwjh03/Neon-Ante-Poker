@@ -11,8 +11,20 @@ namespace {
 std::unique_ptr<App> browserApp;
 RenderTexture2D browserCanvas{};
 std::string lastStatus;
+bool browserPlaying = false;
+
+void showBrowserTitle(){
+    browserPlaying=false;
+    const auto& g=browserApp->game;
+    const std::string summary=g.modeName()+" / "+g.starterName()+" / Ante "+std::to_string(g.ante)+
+        " / "+g.blindName()+" / $"+number(g.cash)+
+        (g.phase==Phase::Shop?" / Night Market":g.phase==Phase::Won?" / Victory":g.phase==Phase::Lost?" / Run ended":"");
+    EM_ASM({if(window.neonGameReady)window.neonGameReady($0,UTF8ToString($1));},
+           browserApp->browserRunAvailable,summary.c_str());
+}
 
 void drawBrowserFrame(){
+    if(!browserPlaying)return;
     auto& app=*browserApp;
     const float scale=std::min(GetScreenWidth()/theme::canvasWidth,GetScreenHeight()/theme::canvasHeight);
     const Vector2 offset={(GetScreenWidth()-theme::canvasWidth*scale)/2,(GetScreenHeight()-theme::canvasHeight*scale)/2};
@@ -39,7 +51,7 @@ void drawBrowserFrame(){
     }
     if(app.quitRequested){
         app.quitRequested=false;
-        EM_ASM({ if(window.neonShowStart)window.neonShowStart(true); });
+        showBrowserTitle();
     }
 }
 } // namespace
@@ -49,6 +61,22 @@ extern "C" EMSCRIPTEN_KEEPALIVE void neon_import_build(const char* text){
 }
 extern "C" EMSCRIPTEN_KEEPALIVE void neon_export_build(){
     if(browserApp)browserApp->exportBrowserBuild();
+}
+extern "C" EMSCRIPTEN_KEEPALIVE int neon_begin_run(int mode,int starter){
+    if(!browserApp||!browserApp->beginBrowserRun(mode,starter))return 0;
+    browserPlaying=true;
+    return 1;
+}
+extern "C" EMSCRIPTEN_KEEPALIVE int neon_resume_run(){
+    if(!browserApp||!browserApp->browserRunAvailable)return 0;
+    browserApp->modal=Modal::None;
+    browserPlaying=true;
+    return 1;
+}
+extern "C" EMSCRIPTEN_KEEPALIVE void neon_return_title(){
+    if(!browserApp)return;
+    if(browserApp->browserRunAvailable)browserApp->saveRun();
+    showBrowserTitle();
 }
 
 int runApplication(int, char**){
@@ -62,7 +90,7 @@ int runApplication(int, char**){
     browserApp->ui.loadFonts();browserApp->audio.init();
     browserCanvas=LoadRenderTexture(1280,800);
     SetTextureFilter(browserCanvas.texture,TEXTURE_FILTER_BILINEAR);
-    EM_ASM({if(window.neonGameReady)window.neonGameReady();});
+    showBrowserTitle();
     emscripten_set_main_loop(drawBrowserFrame,0,1);
     return 0;
 }

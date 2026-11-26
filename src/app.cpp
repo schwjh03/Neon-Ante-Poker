@@ -27,8 +27,15 @@ App::App(bool testing) : previewSession(testing) {
     std::filesystem::create_directories(directory, error);
     savePath = (directory / "run-v2.save").string();
     libraryPath=directory / "build-library.txt";library.load(libraryPath);
-    if(!game.load(savePath)){
+    const bool loaded = game.load(savePath);
+#ifdef __EMSCRIPTEN__
+    browserRunAvailable = loaded;
+#endif
+    if(!loaded){
         const bool migrate=!std::filesystem::exists(savePath)&&game.load((directory/"run.save").string());
+#ifdef __EMSCRIPTEN__
+        browserRunAvailable = migrate;
+#endif
         if(!migrate)modal=Modal::RunSetup;
     }
     pendingMode=static_cast<int>(game.mode);pendingStarter=game.starter;
@@ -46,6 +53,7 @@ void App::saveRun() {
         }
         saveFailed = !game.save(savePath)||!archiveOK;
 #ifdef __EMSCRIPTEN__
+        browserRunAvailable = true;
         if(!saveFailed)saveFailed=!persistBrowserStorage();
 #endif
     }

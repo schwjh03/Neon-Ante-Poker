@@ -4,7 +4,7 @@ A single-player poker roguelike for browsers and 64-bit Windows, built with C++1
 
 ## Play without building
 
-**[Play Neon Ante in your browser](https://schwjh03.github.io/Neon-Ante-Poker/)**. Click Play Neon Ante to load the game. No installation or account is required.
+**[Play Neon Ante in your browser](https://schwjh03.github.io/Neon-Ante-Poker/)**. Choose a game mode and starting style, then select **Start new run**, or use **Continue saved run** to return to your table. No installation or account is required.
 
 Open [Releases](https://github.com/schwjh03/Neon-Ante-Poker/releases), download the Windows ZIP, extract it, and run `NeonAntePoker.exe`. No installer or extra runtime download is required. Source code archives under a release are for developers, rather than the playable game.
 
@@ -16,6 +16,8 @@ Build poker hands, combine relics, and spend your winnings at the Night Market. 
 
 
 The browser edition compiles the same C++ engine and rendered game to WebAssembly. It includes all four modes, starting styles, market upgrades, challenges, drafting, and ordered relic effects. Browser saves and the build library stay in this browser on this device; clearing site data removes them. Windows saves remain separate. Use Export build / Import build to share a deck snapshot deliberately. A larger screen or landscape view gives the table more room.
+
+The browser always opens at the title menu. It validates your save before showing Continue, shows a summary of the saved table, and asks before a new run replaces it. The table is paused while the title menu is open. Use **Main menu** above the table to save and return to your choices.
 
 ## Run modes and starting styles
 

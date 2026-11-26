@@ -21,8 +21,8 @@ EM_JS(int, restoreWebFiles, (), {
 
 EM_JS(int, persistWebFiles, (), {
     try {
-        var run=FS.analyzePath('/neon/run-v2.save').exists?FS.readFile('/neon/run-v2.save',{encoding:'utf8'}):'';
-        var library=FS.analyzePath('/neon/build-library.txt').exists?FS.readFile('/neon/build-library.txt',{encoding:'utf8'}):'';
+        var run=FS.analyzePath('/neon/run-v2.save').exists?FS.readFile('/neon/run-v2.save',{encoding:'utf8'}):"";
+        var library=FS.analyzePath('/neon/build-library.txt').exists?FS.readFile('/neon/build-library.txt',{encoding:'utf8'}):"";
         localStorage.setItem('neon-ante-browser-v1',JSON.stringify({run:run,library:library}));
         var label=document.getElementById('storage-note');
         if(label)label.textContent='Run saved in this browser.';
@@ -36,6 +36,13 @@ EM_JS(int, persistWebFiles, (), {
 
 bool restoreBrowserStorage(){return restoreWebFiles()!=0;}
 bool persistBrowserStorage(){return persistWebFiles()!=0;}
+
+bool App::beginBrowserRun(int mode, int starter){
+    if(mode<0||mode>3||starter<0||starter>2)return false;
+    pendingMode=mode;pendingStarter=starter;
+    startConfiguredRun();
+    return true;
+}
 
 void requestBrowserBuildImport(){
     EM_ASM({ document.getElementById('build-upload').click(); });

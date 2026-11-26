@@ -30,6 +30,8 @@ public:
 #ifdef __EMSCRIPTEN__
     void importBrowserBuild(const char* text);
     void exportBrowserBuild();
+    bool beginBrowserRun(int mode, int starter);
+    bool browserRunAvailable = false;
 #endif
 
     Game game;
