@@ -3,8 +3,10 @@
 #include "game.hpp"
 #include "theme.hpp"
 #include <string>
+#include <array>
 
 namespace neon {
+struct Scene3D;
 
 // Shared immediate-mode drawing and pointer state for one application window.
 class Ui {
@@ -15,6 +17,11 @@ public:
 
     void loadFonts();
     void unloadFonts();
+    void prepareScene3D(const Game& game, const std::array<float,52>& lifts);
+    void unloadScene3D();
+    bool hasScene3D() const;
+    void drawScene3D();
+    void drawHand3D();
     void beginFrame(bool allowInteraction);
     void clearTooltip();
     void finishFrame();
@@ -48,6 +55,7 @@ public:
     void drawRelic(int relicId, Rectangle bounds);
 
 private:
+    Scene3D* scene3D = nullptr;
     Font regular{};
     Font bold{};
     Font display{};

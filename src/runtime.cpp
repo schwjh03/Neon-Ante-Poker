@@ -73,6 +73,7 @@ int runFrames(App& app, RenderTexture2D canvas, const LaunchOptions& options) {
         app.update(std::min(GetFrameTime(), .05f));
         smoke.beforeFrame(frame);
 
+        app.ui.prepareScene3D(app.game,app.cardLift);
         BeginTextureMode(canvas);
         app.render();
         EndTextureMode();

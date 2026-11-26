@@ -1,5 +1,9 @@
 ## Browser edition (main)
 
+- Added original 3D meshes for a rounded felt table, wood and leather rails, chip stacks, a physical deck, and beveled playing cards.
+- Lit materials, original procedural surface textures, card hover tilt, lifted selections, and contact shadows work in browser and Windows builds.
+- Cache unchanged 3D passes and queue browser pointer presses so brief clicks remain responsive.
+- A matching Windows 3D preview ZIP is included in `docs/downloads/`; the earlier 1.2.0 release remains available.
 - Added a title menu with all four mode choices, three starting styles, and a separate Continue saved run button.
 - Show a validated save summary, confirm before replacing a run, and pause the table while the title menu is open.
 - Added Main menu above the table to save and return without reloading.

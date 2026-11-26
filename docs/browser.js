@@ -54,14 +54,20 @@ function loadingFailed(){
  document.querySelector('#retry-load').hidden=false;
 }
 window.Module={
- canvas,locateFile:path=>path+'?v=title-1',
+ canvas,locateFile:path=>path+'?v=table-3d-3',
  setStatus(text){if(text&&!ready)loading.textContent=text;},onAbort:loadingFailed,
  printErr(...parts){console.error(...parts);}
 };
 document.querySelector('#retry-load').addEventListener('click',()=>location.reload());
-const engineScript=document.createElement('script');engineScript.src='neon.js?v=title-1';engineScript.onerror=loadingFailed;document.body.appendChild(engineScript);
+const engineScript=document.createElement('script');engineScript.src='neon.js?v=table-3d-3';engineScript.onerror=loadingFailed;document.body.appendChild(engineScript);
 canvas.addEventListener('contextmenu',event=>event.preventDefault());
-canvas.addEventListener('pointerdown',()=>canvas.focus());
+canvas.addEventListener('pointerdown',event=>{
+ canvas.focus();
+ if(event.button===0&&ready&&!playScreen.hidden){
+  const bounds=canvas.getBoundingClientRect();
+  Module.ccall('neon_pointer_pressed',null,['number','number'],[(event.clientX-bounds.left)*1280/bounds.width,(event.clientY-bounds.top)*800/bounds.height]);
+ }
+});
 window.addEventListener('keydown',event=>{
  if(!playScreen.hidden&&document.activeElement===canvas&&[' ','Backspace','Tab','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key))event.preventDefault();
 });

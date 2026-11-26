@@ -5,6 +5,7 @@
 #include <emscripten.h>
 #include <algorithm>
 #include <memory>
+#include <deque>
 
 namespace neon {
 namespace {
@@ -12,9 +13,11 @@ std::unique_ptr<App> browserApp;
 RenderTexture2D browserCanvas{};
 std::string lastStatus;
 bool browserPlaying = false;
+std::deque<Vector2> browserClicks;
 
 void showBrowserTitle(){
     browserPlaying=false;
+    browserClicks.clear();
     const auto& g=browserApp->game;
     const std::string summary=g.modeName()+" / "+g.starterName()+" / Ante "+std::to_string(g.ante)+
         " / "+g.blindName()+" / $"+number(g.cash)+
@@ -30,8 +33,11 @@ void drawBrowserFrame(){
     const Vector2 offset={(GetScreenWidth()-theme::canvasWidth*scale)/2,(GetScreenHeight()-theme::canvasHeight*scale)/2};
     const auto mouse=GetMousePosition();
     app.ui.mouse={(mouse.x-offset.x)/scale,(mouse.y-offset.y)/scale};
-    app.ui.clicked=IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+    // Preserve short DOM pointer presses even when a 3D frame takes longer than the click.
+    app.ui.clicked=!browserClicks.empty();
+    if(app.ui.clicked){app.ui.mouse=browserClicks.front();browserClicks.pop_front();}
     app.update(std::min(GetFrameTime(),.05f));
+    app.ui.prepareScene3D(app.game,app.cardLift);
     BeginTextureMode(browserCanvas);app.render();EndTextureMode();
     BeginDrawing();ClearBackground(theme::bg);
     DrawTexturePro(browserCanvas.texture,{0,0,theme::canvasWidth,-theme::canvasHeight},
@@ -61,6 +67,9 @@ extern "C" EMSCRIPTEN_KEEPALIVE void neon_import_build(const char* text){
 }
 extern "C" EMSCRIPTEN_KEEPALIVE void neon_export_build(){
     if(browserApp)browserApp->exportBrowserBuild();
+}
+extern "C" EMSCRIPTEN_KEEPALIVE void neon_pointer_pressed(float x,float y){
+    if(browserPlaying&&browserClicks.size()<16&&x>=0&&x<=1280&&y>=0&&y<=800)browserClicks.push_back({x,y});
 }
 extern "C" EMSCRIPTEN_KEEPALIVE int neon_begin_run(int mode,int starter){
     if(!browserApp||!browserApp->beginBrowserRun(mode,starter))return 0;

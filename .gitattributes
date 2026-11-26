@@ -1,6 +1,7 @@
 *.data binary
 *.wasm binary
 *.ttf binary
+*.zip binary
 # Preserve upstream license text verbatim.
 docs/licenses/* -whitespace
 web/assets/fonts/*-OFL.txt -whitespace

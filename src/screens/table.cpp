@@ -70,6 +70,7 @@ void App::drawTable() {
     ui.drawText("YOUR HAND", 292, 537, 16, muted, true);
     ui.drawText(std::to_string(game.selected.size()) + " / 5 SELECTED", 1062, 537, 16, muted, true);
     float cw = 104, gap = 13, span = game.hand.size() * (cw + gap) - gap, start = 772 - span / 2;
+    if(ui.hasScene3D())ui.drawHand3D();
     for (size_t i = 0; i < game.hand.size(); ++i) {
         int id = game.hand[i];
         bool sel = std::find(game.selected.begin(), game.selected.end(), id) != game.selected.end();
@@ -78,7 +79,7 @@ void App::drawTable() {
         if (hot) {
             r.y -= 4;
         }
-        ui.drawCard(game.deck[id], r, sel, game.boss() == 2 && game.deck[id].suit == 2);
+        if(!ui.hasScene3D())ui.drawCard(game.deck[id], r, sel, game.boss() == 2 && game.deck[id].suit == 2);
         ui.drawBox({r.x+cw/2-12, 721,24,18},Fade(bg,.8f),Fade(line,.7f),.15f);
         ui.drawCenteredText(std::to_string(i+1),r.x+cw/2,725,16,muted,true);
         if (ui.wasClicked(r) && screenTransition <= 0) {

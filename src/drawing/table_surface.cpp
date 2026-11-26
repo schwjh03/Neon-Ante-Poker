@@ -20,6 +20,11 @@ void Ui::drawChip(Vector2 p, float r, Color c, int suit) {
 
 void Ui::drawTableSurface(bool market) {
     ClearBackground(bg);
+    if(hasScene3D()){
+        DrawRectangleGradientV(264,75,1016,725,{19,37,45,255},{9,17,29,255});
+        drawScene3D();
+        return;
+    }
     const Color top=market?Color{29,35,65,255}:Color{23,72,73,255};
     const Color bottom=market?Color{16,23,43,255}:Color{10,37,48,255};
     DrawRectangleGradientV(264,75,1016,725,top,bottom);

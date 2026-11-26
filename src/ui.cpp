@@ -35,6 +35,7 @@ void Ui::loadFonts() {
 }
 
 void Ui::unloadFonts() {
+    unloadScene3D();
     if (regular.texture.id != GetFontDefault().texture.id) {
         UnloadFont(regular);
     }

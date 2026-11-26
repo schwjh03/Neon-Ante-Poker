@@ -19,7 +19,7 @@ try {
     New-Item -ItemType Directory -Force build/web,docs | Out-Null
     $raySource = Join-Path $Raylib 'src'
     $rayObjects = @()
-    foreach ($unit in @('rcore','rshapes','rtextures','rtext','utils')) {
+    foreach ($unit in @('rcore','rshapes','rtextures','rtext','rmodels','utils')) {
         $object = "build/web/$unit.o"
         & $python $compiler '-O2' '-DPLATFORM_WEB' '-DGRAPHICS_API_OPENGL_ES2' "-I$raySource" '-c' (Join-Path $raySource "$unit.c") '-o' $object
         if ($LASTEXITCODE -ne 0) { throw "Browser graphics compilation failed: $unit" }
@@ -39,7 +39,7 @@ try {
     & $python $compiler '-std=c++17' '-O2' '-Wall' '-Wextra' '-Isrc' "-I$raySource" @sources `
         'build/web/libpheval.a' 'build/web/libraylib.a' '-sUSE_GLFW=3' '-sALLOW_MEMORY_GROWTH=1' `
         '-sINITIAL_MEMORY=67108864' '-sSTACK_SIZE=2097152' '-sENVIRONMENT=web' '-sFORCE_FILESYSTEM=1' `
-        '-sEXPORTED_FUNCTIONS=_main,_neon_import_build,_neon_export_build,_neon_begin_run,_neon_resume_run,_neon_return_title' '-sEXPORTED_RUNTIME_METHODS=ccall' `
+        '-sEXPORTED_FUNCTIONS=_main,_neon_import_build,_neon_export_build,_neon_begin_run,_neon_resume_run,_neon_return_title,_neon_pointer_pressed' '-sEXPORTED_RUNTIME_METHODS=ccall' `
         '-sASSERTIONS=1' '--preload-file' 'web/assets@/assets' '-o' 'docs/neon.js'
     if ($LASTEXITCODE -ne 0) { throw 'Browser game build failed.' }
     Copy-Item web/index.html,web/styles.css,web/browser.js -Destination docs
