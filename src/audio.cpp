@@ -4,8 +4,24 @@
 #include <cmath>
 #include <cstring>
 // The multimedia API requires Windows types to be declared first.
+#ifndef __EMSCRIPTEN__
 #include <windows.h>
 #include <mmsystem.h>
+#else
+#include <emscripten.h>
+EM_JS(void, playBrowserTone, (int index), {
+        try {
+            var audio=window.neonAudio||(window.neonAudio=new (window.AudioContext||window.webkitAudioContext)());
+            if(audio.state==='suspended')audio.resume().catch(function(){});
+            var tone=audio.createOscillator(),gain=audio.createGain(),now=audio.currentTime;
+            tone.frequency.value=[600,280,720,880,160][index];
+            gain.gain.setValueAtTime(0.045,now);gain.gain.exponentialRampToValueAtTime(0.0001,now+0.22);
+            tone.connect(gain);gain.connect(audio.destination);tone.start(now);tone.stop(now+0.23);
+        } catch(error) {}
+
+});
+
+#endif
 
 void Audio::init() {
     const double frequencies[] = {600, 280, 720, 880, 160};
@@ -46,10 +62,16 @@ void Audio::play(int index) {
     if (muted || index < 0 || index >= 5 || waves[index].empty()) {
         return;
     }
+#ifdef __EMSCRIPTEN__
+    playBrowserTone(index);
+#else
     PlaySoundA(reinterpret_cast<const char*>(waves[index].data()), nullptr,
                SND_ASYNC | SND_MEMORY | SND_NODEFAULT);
+#endif
 }
 
 Audio::~Audio() {
+#ifndef __EMSCRIPTEN__
     PlaySoundA(nullptr, nullptr, 0);
+#endif
 }

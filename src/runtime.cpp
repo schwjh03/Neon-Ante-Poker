@@ -1,3 +1,4 @@
+#ifndef __EMSCRIPTEN__
 #include "runtime.hpp"
 #include "../tests/ui_smoke.hpp"
 #include "app.hpp"
@@ -126,3 +127,5 @@ int runApplication(int argc, char** argv) {
     return exitCode;
 }
 } // namespace neon
+
+#endif

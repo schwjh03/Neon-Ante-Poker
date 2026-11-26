@@ -27,6 +27,11 @@ public:
     void render();
     void saveRun();
 
+#ifdef __EMSCRIPTEN__
+    void importBrowserBuild(const char* text);
+    void exportBrowserBuild();
+#endif
+
     Game game;
     Ui ui;
     Audio audio;

@@ -1,3 +1,11 @@
+## Browser edition (main)
+
+- Play the same C++ game in a browser through WebAssembly, with all four modes and the full market.
+- Local browser autosaves, a saved build library, and validated build import/export.
+- Mouse and keyboard controls, a fullscreen button, openly licensed readable fonts, and browser audio.
+- The existing Windows 1.2.0 download remains available; Windows saves stay separate.
+- Verified with 68 WebAssembly engine checks, exhaustive five-card hand counts, and real browser scoring, purchases, relic reordering, and save restoration.
+
 ## 1.2.0 — Readability and the midnight table
 
 - Larger system type, heavier body text, brighter labels and clearer disabled controls.

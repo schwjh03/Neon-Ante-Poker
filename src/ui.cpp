@@ -6,12 +6,19 @@ namespace neon {
 using namespace theme;
 
 void Ui::loadFonts() {
+#ifdef __EMSCRIPTEN__
+    regular = LoadFontEx("/assets/fonts/regular.ttf", 48, nullptr, 0);
+    bold = LoadFontEx("/assets/fonts/bold.ttf", 72, nullptr, 0);
+    display = LoadFontEx("/assets/fonts/display.ttf", 96, nullptr, 0);
+#else
     const char* windowsDirectory = std::getenv("WINDIR");
     std::string fontDirectory =
         std::string(windowsDirectory ? windowsDirectory : "C:/Windows") + "/Fonts/";
     regular = LoadFontEx((fontDirectory + "seguisb.ttf").c_str(), 48, nullptr, 0);
     bold = LoadFontEx((fontDirectory + "segoeuib.ttf").c_str(), 72, nullptr, 0);
     display = LoadFontEx((fontDirectory + "georgiab.ttf").c_str(), 96, nullptr, 0);
+
+#endif
 
     if (!regular.texture.id) {
         regular = GetFontDefault();

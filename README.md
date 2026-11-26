@@ -1,8 +1,10 @@
 # Neon Ante Poker
 
-A single-player poker roguelike for 64-bit Windows, built with C++17 and raylib.
+A single-player poker roguelike for browsers and 64-bit Windows, built with C++17 and raylib.
 
 ## Play without building
+
+**[Play Neon Ante in your browser](https://schwjh03.github.io/Neon-Ante-Poker/)**. Click Play Neon Ante to load the game. No installation or account is required.
 
 Open [Releases](https://github.com/schwjh03/Neon-Ante-Poker/releases), download the Windows ZIP, extract it, and run `NeonAntePoker.exe`. No installer or extra runtime download is required. Source code archives under a release are for developers, rather than the playable game.
 
@@ -13,7 +15,7 @@ Build poker hands, combine relics, and spend your winnings at the Night Market. 
 ![Actual Night Market](docs/screenshots/market.png)
 
 
-A native Windows poker roguelike, written in C++17. Run **NeonAntePoker.exe** to play. No browser, installer, account, internet connection, or extra runtime download is required on Windows 10/11 (64-bit).
+The browser edition compiles the same C++ engine and rendered game to WebAssembly. It includes all four modes, starting styles, market upgrades, challenges, drafting, and ordered relic effects. Browser saves and the build library stay in this browser on this device; clearing site data removes them. Windows saves remain separate. Use Export build / Import build to share a deck snapshot deliberately. A larger screen or landscape view gives the table more room.
 
 ## Run modes and starting styles
 
@@ -53,11 +55,11 @@ Your enhanced deck survives between blinds. Foil adds 35 chips, wild cards match
 - **R** sorts by rank; **S** sorts by suit.
 - Right-click clears the selection.
 - **Tab** opens the deck; **H** opens the hand reference.
-- **M** toggles sound; **F11** toggles borderless fullscreen.
-- **Escape** opens/closes menus. Closing the window saves the run.
+- **M** toggles sound. On Windows, **F11** toggles borderless fullscreen; in the browser, use the Fullscreen button.
+- **Escape** opens/closes menus. Actions save the run automatically.
 - The **i** button beside a hand opens its scoring breakdown.
 
-Runs save automatically after actions to `%LOCALAPPDATA%\NeonAntePoker\run-v2.save`. Relaunching resumes the run. New Run requires confirmation. Saved runs stay on the current Windows user account.
+Windows runs save automatically after actions to `%LOCALAPPDATA%\NeonAntePoker\run-v2.save`. Browser runs use local browser storage. Relaunching resumes the run. New Run requires confirmation. Browser and Windows editions do not sync saves automatically.
 
 ## Build
 
@@ -71,6 +73,18 @@ From PowerShell in this folder:
 ```
 
 The build is offline. `build.ps1` compiles the poker evaluator, links the graphics library and C++ runtime statically, and writes the game to `build\NeonAntePoker.exe`. Runtime DLL dependencies are Windows system libraries only. The application uses installed Segoe UI Semibold and Georgia fonts, with a built-in font fallback, and generates its card art and sound effects in code.
+
+## Build the browser edition
+
+Install and activate the official [Emscripten SDK](https://emscripten.org/docs/tools_reference/emsdk.html) **4.0.7** into `build/emsdk`, including its bundled Python and Node, and obtain official [raylib 5.5](https://github.com/raysan5/raylib/tree/5.5) sources in `build/raylib-src`. The tested raylib commit is `c1ab645ca298a2801097931d1079b10ff7eb9df8`. The SDK and graphics sources are build tools, excluded from this repository. The fonts, font licenses, shell, and game source are included.
+
+```powershell
+.\build-web.ps1 -TestEngine
+```
+
+The script uses the SDK's local configuration and outputs `docs/index.html`, `neon.js`, `neon.wasm`, and `neon.data`, plus the shell assets and licenses. Custom SDK and raylib paths can be passed with `-Emsdk` and `-Raylib`. Serve `docs/` over HTTP; opening its HTML as a local file will not load WebAssembly assets. GitHub Pages uses **main /docs**. No backend, analytics, account system, or external runtime service is required.
+
+The browser uses openly licensed Atkinson Hyperlegible and Libre Baskerville fonts, and user-activated WebAudio for synthesized sound. Its save adapter stores one localStorage envelope after actions. Imported files pass the same build validation as Windows.
 
 ## Verification
 
@@ -97,6 +111,8 @@ Screenshots can be generated without changing your save:
 `main.cpp` only calls `runApplication()`. Start with [docs/CODE_STRUCTURE.md](docs/CODE_STRUCTURE.md) for the file tree, frame flow, and a guide to common edits.
 
 - `src/runtime.cpp`: window setup, command-line options, and frame loop.
+- `src/web_runtime.cpp`, `src/web_platform.cpp`: browser frame loop, local saves, and build import/export.
+- `web/`, `build-web.ps1`: browser shell, licensed fonts, and WebAssembly build.
 - `src/app.hpp`, `src/app.cpp`: application state, keyboard input, animations, and screen dispatch.
 - `src/screens/`: separate table, shop, HUD, end screen, and dialog implementations.
 - `src/ui.hpp`, `src/ui.cpp`, `src/drawing/`: fonts, pointer state, reusable controls, and card/relic artwork.

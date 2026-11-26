@@ -2,6 +2,9 @@
 #include <algorithm>
 #include <cstdlib>
 #include <filesystem>
+#ifdef __EMSCRIPTEN__
+#include "web_platform.hpp"
+#endif
 
 namespace neon {
 using namespace theme;
@@ -12,10 +15,14 @@ App::App(bool testing) : previewSession(testing) {
         return;
     }
 
+#ifdef __EMSCRIPTEN__
+    const std::filesystem::path directory="/neon";
+#else
     const char* localAppData = std::getenv("LOCALAPPDATA");
     auto directory = localAppData ? std::filesystem::path(localAppData) / "NeonAntePoker"
                                   : std::filesystem::path(GetApplicationDirectory());
 
+#endif
     std::error_code error;
     std::filesystem::create_directories(directory, error);
     savePath = (directory / "run-v2.save").string();
@@ -38,6 +45,9 @@ void App::saveRun() {
             else archiveOK=false;
         }
         saveFailed = !game.save(savePath)||!archiveOK;
+#ifdef __EMSCRIPTEN__
+        if(!saveFailed)saveFailed=!persistBrowserStorage();
+#endif
     }
 }
 
@@ -103,9 +113,11 @@ void App::handleKeyboard() {
         modal = modal == Modal::None ? Modal::Menu : Modal::None;
         relicDetailIndex = -1;
     }
+#ifndef __EMSCRIPTEN__
     if (IsKeyPressed(KEY_F11)) {
         ToggleBorderlessWindowed();
     }
+#endif
     if (IsKeyPressed(KEY_M)) {
         audio.muted = !audio.muted;
     }

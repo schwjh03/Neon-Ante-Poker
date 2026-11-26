@@ -1,5 +1,8 @@
 #include "app.hpp"
 #include <algorithm>
+#ifdef __EMSCRIPTEN__
+#include "web_platform.hpp"
+#endif
 
 namespace neon {
 using namespace theme;
@@ -40,15 +43,23 @@ void App::drawRunSetup(){
     ui.drawText(echo?echo->summary():"No completed runs yet. Echo starts at a +10% target.",168,516,18,ink);
     ui.drawWrappedText("Completed runs stay on this computer. Import a friend's .neonbuild file to include their deck, relics, and hand history. No automatic uploads or online leaderboard.",{168,545,900,42},16,muted);
     if(ui.button({168,600,190,38},"Export current build",blue)){
+#ifdef __EMSCRIPTEN__
+        exportBrowserBuild();
+#else
         const auto file=chooseBuildFile(true);if(!file.empty())setupMessage=exportBuild(captureBuild(game),file)?"Build exported. Share the file yourself.":"Export failed. Check the selected folder.";
+#endif
     }
     if(ui.button({372,600,190,38},"Import shared build",blue)){
+#ifdef __EMSCRIPTEN__
+        requestBrowserBuildImport();
+#else
         const auto file=chooseBuildFile(false);if(!file.empty()){
             BuildProfile imported;
             if(!importBuild(file,imported))setupMessage="That file is not a valid Neon Ante build. The current run is unchanged.";
             else if(library.add(imported))setupMessage=library.save(libraryPath)?"Build imported. Your next Echo run can use it.":"Build imported for this session; the library could not be saved.";
             else setupMessage="That build is already in the library.";
         }
+#endif
     }
     if(ui.button({838,652,276,47},"Start this run",gold,true))modal=Modal::ConfirmNewRun;
     if(ui.button({168,652,190,43},"Keep playing",mint))modal=Modal::None;

@@ -1,3 +1,4 @@
+#ifndef __EMSCRIPTEN__
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
@@ -14,3 +15,5 @@ std::filesystem::path chooseBuildFile(bool saving){
     return (saving?GetSaveFileNameW(&dialog):GetOpenFileNameW(&dialog))?std::filesystem::path(name):std::filesystem::path{};
 }
 } // namespace neon
+
+#endif
