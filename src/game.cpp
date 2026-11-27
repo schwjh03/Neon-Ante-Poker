@@ -10,6 +10,7 @@ Game::Game(uint32_t seed) {
 
 void Game::newRun(uint32_t seed, RunMode newMode, int newStarter) {
     mode=newMode;starter=std::clamp(newStarter,0,2);runSeed=seed;archived=false;handUse.fill(0);echoScale=1;echoHand=-1;
+    clubChoices.fill(0);
     rng.seed(seed);
     phase = Phase::Play;
     ante = round = 1;

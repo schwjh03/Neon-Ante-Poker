@@ -10,7 +10,7 @@
 
 namespace neon {
 
-enum class Modal { None, Menu, HandReference, Deck, Relic, ConfirmNewRun, ScoreDetails, RunSetup, Contract, Draft };
+enum class Modal { None, Menu, HandReference, Deck, Relic, ConfirmNewRun, ScoreDetails, RunSetup, Contract, Draft, ClubStory };
 
 struct Particle {
     Vector2 position;
@@ -54,6 +54,7 @@ private:
     std::filesystem::path libraryPath;
     BuildLibrary library;
     int pendingMode=0, pendingStarter=0;
+    int clubPage=0;
     std::string setupMessage;
 
     void updateAnimations(float deltaTime);
@@ -79,6 +80,7 @@ private:
     void drawRunSetup();
     void drawContractDialog();
     void drawDraftDialog();
+    void drawClubStory();
     void startConfiguredRun();
 };
 } // namespace neon

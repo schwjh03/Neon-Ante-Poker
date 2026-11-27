@@ -232,6 +232,7 @@ void App::drawDialogs() {
     case Modal::RunSetup:drawRunSetup();break;
     case Modal::Contract:drawContractDialog();break;
     case Modal::Draft:drawDraftDialog();break;
+    case Modal::ClubStory:drawClubStory();break;
     case Modal::ConfirmNewRun:
         drawNewRunDialog();
         break;

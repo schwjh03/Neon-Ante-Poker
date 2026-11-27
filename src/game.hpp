@@ -42,6 +42,20 @@ struct Offer {
     bool sold = false;
 };
 
+struct ClubOption {
+    const char* title;
+    const char* reward;
+    int kind;
+    int amount;
+};
+struct ClubChapter {
+    const char* character;
+    const char* title;
+    const char* story;
+    std::array<ClubOption,2> choices;
+};
+extern const std::array<ClubChapter,8> clubChapters;
+
 struct Score {
     Hand hand = Hand::High;
     int chips = 0;
@@ -107,6 +121,7 @@ public:
     std::array<int, 10> handUse{};
     double echoScale = 1;
     int echoHand = -1;
+    std::array<int,8> clubChoices{};
 
     explicit Game(uint32_t seed = std::random_device{}());
     void newRun(uint32_t seed, RunMode newMode = RunMode::Classic, int newStarter = 0);
@@ -137,6 +152,9 @@ public:
     bool sell(int index);
     bool moveRelic(int index,int direction);
     bool reroll();
+    bool clubStoryPending() const;
+    bool chooseClubStory(int choice);
+    std::string clubEnding() const;
     std::string offerName(const Offer& o) const;
     std::string offerDescription(const Offer& o) const;
     bool save(const std::string& path) const;

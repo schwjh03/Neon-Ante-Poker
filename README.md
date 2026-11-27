@@ -142,3 +142,9 @@ The poker rules are a custom single-player score-chasing variant, not a multipla
 ### Readability and visual update (1.2)
 
 Labels use a 16px minimum at the 1280×800 game canvas; descriptions use at least 18px. Body text uses Segoe UI Semibold, and dim labels have brighter contrast. The table includes stitched felt, a dealer chip, chip stacks and a draw deck. Every relic now has its own emblem. All visuals are drawn locally in code; no network or asset download is needed.
+
+## The Midnight Club stories
+
+The Night Market now includes **Meet [character] / Club journal**. Across eight antes, meet Vale, Mara, Rook, Iris, Quill and the regulars. Each chapter offers two authored replies with a once-per-ante boon: cash, a hand level, card upgrades or an extra discard. Your choices remain in the journal and influence the ending. Conversations are optional and never block buying, sorting relics or choosing your next blind.
+
+New runs reset the chapter choices. Existing version-2 saves load with an empty journal; the optional STORY section records the new choices in browser and Windows builds. Validation passes 86 engine checks (including exhaustive five-card evaluation) and 47 native UI smoke steps.

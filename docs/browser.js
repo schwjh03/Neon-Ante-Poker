@@ -54,12 +54,12 @@ function loadingFailed(){
  document.querySelector('#retry-load').hidden=false;
 }
 window.Module={
- canvas,locateFile:path=>path+'?v=table-3d-3',
+ canvas,locateFile:path=>path+'?v=club-story-1',
  setStatus(text){if(text&&!ready)loading.textContent=text;},onAbort:loadingFailed,
  printErr(...parts){console.error(...parts);}
 };
 document.querySelector('#retry-load').addEventListener('click',()=>location.reload());
-const engineScript=document.createElement('script');engineScript.src='neon.js?v=table-3d-3';engineScript.onerror=loadingFailed;document.body.appendChild(engineScript);
+const engineScript=document.createElement('script');engineScript.src='neon.js?v=club-story-1';engineScript.onerror=loadingFailed;document.body.appendChild(engineScript);
 canvas.addEventListener('contextmenu',event=>event.preventDefault());
 canvas.addEventListener('pointerdown',event=>{
  canvas.focus();

@@ -63,7 +63,10 @@ void App::drawSidebar() {
     ui.drawText("$" + number(game.cash), 24, 561, 40, gold, true);
     ui.drawText("Interest  $" + std::to_string(std::min(5, game.cash / 5)) + " / blind", 24, 612,
                 16, muted);
-    if(game.canChooseContract()){
+    if(game.phase==Phase::Shop){
+        const auto& chapter=clubChapters[std::min(7,game.ante-1)];
+        if(ui.button({24,644,216,36},game.clubStoryPending()?"Meet "+std::string(chapter.character):"Club journal",gold,true)){clubPage=std::min(7,game.ante-1);modal=Modal::ClubStory;}
+    }else if(game.canChooseContract()){
         if(ui.button({24,644,216,36},"Table challenge",gold)){modal=Modal::Contract;}
     }else ui.drawFittedText(game.contract?game.contractName():game.starterName()+" / round "+std::to_string(game.round),{24,650,216,27},18,game.contract?gold:ink,true);
     ui.drawText(game.mode==RunMode::Echo?"Echo target +"+std::to_string(static_cast<int>((game.echoScale-1)*100+.5))+"%":"Seed "+(game.runSeed?std::to_string(game.runSeed):"legacy"),24,695,16,muted);

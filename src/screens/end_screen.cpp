@@ -15,13 +15,12 @@ void App::drawEndScreen() {
                             number(game.lifetime),
                         772, 534, 20, c, true);
     if (won) {
-        if (ui.button({652, 604, 240, 52}, "Play endless  >", mint, true)) {
+        ui.drawWrappedText(game.clubEnding(),{445,575,650,72},20,ink);
+        if (ui.button({652, 684, 240, 52}, "Play endless", mint, true)) {
             finishAction(game.next(), 3);
         }
     } else if (ui.button({652, 604, 240, 52}, "New run", mint, true)) {
-        game.newRun(std::random_device{}());
-        cardLift.fill(0);
-        finishAction(true, 3);
+        pendingMode=static_cast<int>(game.mode);pendingStarter=game.starter;modal=Modal::RunSetup;
     }
 }
 } // namespace neon

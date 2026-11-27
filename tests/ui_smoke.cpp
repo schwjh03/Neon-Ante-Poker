@@ -48,6 +48,9 @@ UiSmokeTest::UiSmokeTest(App& application, bool runTest) : app(application), ena
               [this] {
                   return app.game.phase == Phase::Shop && app.game.score == 488;
               }},
+             {"meet the club dealer",{132,662},[this]{return app.modal==Modal::ClubStory;}},
+             {"reply to the dealer once",{400,547},[this]{return app.game.clubChoices[0]==1;}},
+             {"return to the market after the story",{980,670},[this]{return app.modal==Modal::None;}},
              {"buy relic",
               {573, 640},
               [this] {

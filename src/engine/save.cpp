@@ -58,6 +58,7 @@ bool Game::save(const std::string& path) const {
     out << "MODES " << static_cast<int>(mode) << ' ' << runSeed << ' ' << starter << ' ' << lastHandType << ' ' << rhythm << ' ' << playedMask << ' ' << discardsSpent << ' ' << contract << ' ' << contractChosen << ' ' << contractReward << ' ' << draftTaken << ' ' << archived << ' ' << echoScale << ' ' << echoHand << '\n';
     for(int n:handUse){out<<n<<' ';}
     out<<'\n';writeVector(out,draftChoices);
+    out<<"STORY 1";for(int choice:clubChoices)out<<' '<<choice;out<<'\n';
     out.close();
     if (!out) {
         return false;
@@ -120,6 +121,12 @@ bool Game::load(const std::string& path) {
         g.mode=static_cast<RunMode>(modeValue);
         for(int& n:g.handUse)if(!(in>>n))return false;
         if(!readVector(in,g.draftChoices,3))return false;
+        in>>std::ws;
+        if(in.peek()!=std::char_traits<char>::eof()){
+            std::string storyMarker;int storyVersion=0;
+            if(!(in>>storyMarker>>storyVersion)||storyMarker!="STORY"||storyVersion!=1)return false;
+            for(int& choice:g.clubChoices)if(!(in>>choice))return false;
+        }
     }
     if (!g.valid()) {
         return false;
@@ -132,6 +139,7 @@ bool Game::load(const std::string& path) {
 }
 
 bool Game::valid() const {
+    for(size_t i=0;i<clubChoices.size();++i)if(clubChoices[i]<0||clubChoices[i]>2||(static_cast<int>(i)>=ante&&clubChoices[i]!=0))return false;
     if(static_cast<int>(mode)<0||static_cast<int>(mode)>3||starter<0||starter>2||lastHandType< -1||lastHandType>9||rhythm<0||rhythm>3||playedMask<0||playedMask>1023||discardsSpent<0||discardsSpent>5||contract<0||contract>5||contractReward<0||contractReward>5||!(echoScale>=1&&echoScale<=1.8)||echoHand< -1||echoHand>9)return false;
     for(int n:handUse)if(n<0||n>1000000)return false;
     std::set<int> draftIds;for(int id:draftChoices)if(id<0||id>=16||!draftIds.insert(id).second)return false;

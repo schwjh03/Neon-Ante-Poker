@@ -204,6 +204,28 @@ int main() {
         check(beforeReorder==90&&g.moveRelic(0,1)&&g.evaluate(cards({13})).total==68,"moving an additive relic after a multiplier changes actual score");
         check(!g.moveRelic(0,-1)&&!g.moveRelic(1,1)&&!g.moveRelic(0,0),"relic movement rejects invalid boundaries and direction");
         check(g.save(path)&&loaded.load(path)&&loaded.owned==g.owned,"relic slot order survives save reload");std::filesystem::remove(path);
+        {
+            Game story(891);story.phase=Phase::Shop;story.score=story.target();
+            const int initialCash=story.cash;
+            check(story.chooseClubStory(0)&&story.cash==initialCash+2&&story.clubChoices[0]==1,"the first club reply applies its story boon");
+            check(!story.chooseClubStory(1)&&story.cash==initialCash+2,"a story cannot pay twice or switch its recorded reply");
+            check(story.save(path)&&loaded.load(path)&&loaded.clubChoices==story.clubChoices,"club memories survive a save reload");
+            std::ifstream savedStory(path);std::string storyText((std::istreambuf_iterator<char>(savedStory)),{});savedStory.close();
+            {std::ofstream legacy(path);legacy<<storyText.substr(0,storyText.find("STORY 1"));}
+            check(loaded.load(path)&&loaded.clubChoices[0]==0,"legacy version-two saves without a story extension still load");
+            {std::ofstream bad(path);bad<<storyText.substr(0,storyText.find("STORY 1"))<<"STORY 1 99 0 0 0 0 0 0 0\n";}
+            check(!loaded.load(path),"invalid story choices reject the whole staged save");
+            std::filesystem::remove(path);
+            Game foil(1);foil.ante=3;foil.phase=Phase::Shop;
+            check(foil.chooseClubStory(0)&&std::count_if(foil.deck.begin(),foil.deck.end(),[](Card c){return c.foil;})==2,"Rook's story gift upgrades exactly two deck cards");
+            Game wild(1);wild.ante=3;wild.phase=Phase::Shop;
+            check(wild.chooseClubStory(1)&&std::count_if(wild.deck.begin(),wild.deck.end(),[](Card c){return c.wild;})==1,"the alternate Rook reply upgrades one suit-wild card");
+            Game capped(1);capped.ante=4;capped.phase=Phase::Shop;capped.discardBonus=2;
+            check(capped.chooseClubStory(0)&&capped.discardBonus==2&&capped.cash==9,"a capped discard gift converts to the displayed cash reward");
+            Game waiting(1);check(!waiting.chooseClubStory(0)&&!waiting.chooseClubStory(3),"club gifts cannot be claimed while playing a blind");
+            for(int chapter=0;chapter<8;++chapter){Game episode(90+chapter);episode.ante=chapter+1;episode.phase=Phase::Shop;check(episode.chooseClubStory(chapter%2)&&episode.clubChoices[chapter]==chapter%2+1,"every authored chapter has a playable reply");}
+            check(story.clubEnding().find("seat")!=std::string::npos,"the ending reflects the regulars the player helped");
+        }
         // Exhaustive standard-deck frequencies independently verify category boundaries.
         std::array<int64_t, 10> counts{};
         std::vector<Card> v(5);
